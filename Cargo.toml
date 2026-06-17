@@ -5,3 +5,7 @@ resolver = "3"
 [profile.jesus]
 inherits = "dev"
 strip = "debuginfo"
+
+[profile.custom-profile]
+inherits = "dev"
+opt-level = 1

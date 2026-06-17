@@ -87,6 +87,10 @@ export function unpluginFactory(
 	return {
 		name: "unplugin-cargo",
 		resolveId(source, importer) {
+			if (path.isAbsolute(source)) {
+				return null;
+			}
+
 			const hash = libraries.findHashFromValue(
 				(library) => library.libraryFilePath === importer,
 			);
@@ -121,22 +125,25 @@ export function unpluginFactory(
 				projectFilePath,
 			});
 
-			const cargoBuildTargetDir = projectMetadata.target_directory;
-			const libraryTargetName = libraryMetadata.target.name;
+	const cargoBuildTargetDir = projectMetadata.target_directory;
+	const libraryTargetName = libraryMetadata.target.name;
 
-			const libraryBuildDir = path.resolve(
-				cargoBuildTargetDir,
-				cargoBuildTarget,
-				cargoBuildProfile,
-			);
+	const cargoProfileDir = cargoBuildProfile === "dev" ? "debug" : cargoBuildProfile;
 
-			cargoBuild({
-				log,
-				cargoBuildTarget,
-				cargoBuildOverrides,
-				cargoBuildProfile,
-				projectFilePath,
-			});
+	const libraryBuildDir = path.resolve(
+		cargoBuildTargetDir,
+		cargoBuildTarget,
+		cargoProfileDir,
+	);
+
+		cargoBuild({
+			log,
+			cargoBuildTarget,
+			cargoBuildOverrides,
+			cargoBuildProfile,
+			projectFilePath,
+			features: context.features,
+		});
 
 			const wasmFilePath: string = path.resolve(
 				libraryBuildDir,
@@ -204,9 +211,17 @@ async function readJavascriptEntryPoint(library: {
 		`${library.libraryTargetName}.js`,
 	);
 
-	const content = await readFile(entrypoint, {
+	let content = await readFile(entrypoint, {
 		encoding: "utf8",
 	});
+
+	// Rewrite relative imports to absolute imports to avoid resolution issues
+	// across different bundlers and virtual module namespaces.
+	content = content.replace(
+		/((?:import|export)\b[^"']*["'])(\.\/[^"']*)(["'])/g,
+		(_match, prefix, relPath, suffix) =>
+			`${prefix}${path.resolve(library.wasmBindgenOutDir, relPath).replace(/\\/g, "/")}${suffix}`,
+	);
 
 	return content;
 }
@@ -238,9 +253,8 @@ export function buildWasmBindgen(input: {
 	log: pino.Logger;
 }) {
 	const args = [
-		"--target=bundler",
+		input.browserless ? "--target=bundler" : "--browser",
 		input.typescript || `--no-typescript`,
-		input.browserless || `--browser`,
 		`--out-dir=${input.wasmBindgenOutDir}`,
 		input.wasmFilePath,
 	].filter(isString);

@@ -49,6 +49,7 @@
           nodejs_24
           corepack_24
           biome
+          bun
         ];
       in
       {

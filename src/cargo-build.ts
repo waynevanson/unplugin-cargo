@@ -9,6 +9,9 @@ export function cargoBuild(context: {
 	log: pino.Logger;
 	cargoBuildTarget: string;
 	cargoBuildProfile: string;
+	features:
+		| { allFeatures: true }
+		| { features?: Array<string>; noDefaultFeatures?: boolean };
 }) {
 	// create `.wasm` from `.rs`
 	let args = [
@@ -20,6 +23,17 @@ export function cargoBuild(context: {
 		"--quiet",
 		`--profile=${context.cargoBuildProfile}`,
 	].filter(isString);
+
+	if ("allFeatures" in context.features) {
+		args.push("--all-features");
+	} else {
+		if (context.features.noDefaultFeatures) {
+			args.push("--no-default-features");
+		}
+		if (context.features.features && context.features.features.length > 0) {
+			args.push("--features", context.features.features.join(","));
+		}
+	}
 
 	context.log.debug({ args }, "cargo-build:raw-args");
 

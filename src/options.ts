@@ -16,13 +16,10 @@ const enable = v.optional(v.boolean(), false);
 const FeaturesSchema = v.pipe(
 	v.union([
 		v.object({ allFeatures: v.literal(true) }),
-		v.pipe(
-			v.object({
-				features: v.optional(v.array(v.string())),
-				noDefaultFeatures: enable,
-			}),
-			v.transform((possibleFeatures) => ({ possibleFeatures })),
-		),
+		v.object({
+			features: v.optional(v.array(v.string())),
+			noDefaultFeatures: enable,
+		}),
 	]),
 	v.transform((features) => ({ features })),
 );
@@ -67,7 +64,7 @@ const CargoBuildProfile = v.optional(
 			CargoBuildProfileFn,
 		]),
 	),
-	(args_0: { production: boolean }) => (args_0.production ? "release" : "dev"),
+	() => (args_0: { production: boolean }) => (args_0.production ? "release" : "dev"),
 );
 
 const UnpluginCargoOptionsBaseSchema = v.pipe(
