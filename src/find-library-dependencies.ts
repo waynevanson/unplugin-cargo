@@ -1,21 +1,18 @@
+import { readFile } from "node:fs/promises";
 import path from "node:path";
-import type { TransformPluginContext } from "rollup";
 
 // todo: instead of watching just dependencies,
 // we need to watch all files and trigger rebuild when the dependencies change.
-export async function findLibraryDependencies(
-	this: TransformPluginContext,
-	options: {
-		libraryDepsDir: string;
-		libraryTargetName: string;
-	},
-) {
+export async function findLibraryDependencies(options: {
+	libraryDepsDir: string;
+	libraryTargetName: string;
+}) {
 	const libraryDepsFilePath = path.resolve(
 		options.libraryDepsDir,
 		`${options.libraryTargetName}.d`,
 	);
 
-	const dependencies = await this.fs.readFile(libraryDepsFilePath, {
+	const dependencies = await readFile(libraryDepsFilePath, {
 		encoding: "utf8",
 	});
 

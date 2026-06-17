@@ -25,7 +25,7 @@ export function findOnlyOne<T, U extends T>(
 	return found;
 }
 
-export const CACHE_DIR = "node_modules/.cache/vitest-plugin-cargo";
+export const CACHE_DIR = "node_modules/.cache/unplugin-cargo";
 
 export function createLibraryDir(hash: string) {
 	if (hash.length <= 2) {

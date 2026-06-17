@@ -1,6 +1,10 @@
-export { cargo, cargo as default } from "./plugin";
+import { createUnplugin } from "unplugin";
+import { unpluginFactory } from "./core";
+
+export const cargo = createUnplugin(unpluginFactory);
+export default cargo;
+
 export type {
-	CargoBuildOverrides,
-	VitePluginCargoOptions,
-	VitePluginCargoOptionsInternal,
-} from "./plugin-options";
+	UnpluginCargoOptions,
+	UnpluginCargoOptionsInternal,
+} from "./options";

@@ -1,5 +1,4 @@
 import type { LevelWithSilent } from "pino";
-import type { StringFilter } from "rollup";
 import * as v from "valibot";
 
 const logLevel = v.picklist([
@@ -32,12 +31,11 @@ const PatternSchema = v.union([v.string(), v.instance(RegExp)]);
 const MaybeArraySchema = <TSchema extends v.GenericSchema>(schema: TSchema) =>
 	v.union([schema, v.array(schema)]);
 
-const StringFilterSchema: v.GenericSchema<StringFilter> = v.union([
-	PatternSchema,
+const PatternFilterSchema = v.union([
 	MaybeArraySchema(PatternSchema),
 	v.object({
-		include: v.optional(v.union([MaybeArraySchema(PatternSchema)])),
-		exclude: v.optional(v.union([MaybeArraySchema(PatternSchema)])),
+		include: v.optional(MaybeArraySchema(PatternSchema)),
+		exclude: v.optional(MaybeArraySchema(PatternSchema)),
 	}),
 ]);
 
@@ -72,9 +70,10 @@ const CargoBuildProfile = v.optional(
 	(args_0: { production: boolean }) => (args_0.production ? "release" : "dev"),
 );
 
-const VitePluginCargoOptionsBaseSchema = v.pipe(
+const UnpluginCargoOptionsBaseSchema = v.pipe(
 	v.object({
-		pattern: StringFilterSchema,
+		pattern: PatternFilterSchema,
+		production: v.optional(v.boolean()),
 		logLevel: v.optional(logLevel, "silent"),
 		noTypescript: enable,
 		browserOnly: enable,
@@ -83,6 +82,7 @@ const VitePluginCargoOptionsBaseSchema = v.pipe(
 		cargoBuildTarget: v.optional(v.string(), "wasm32-unknown-unknown"),
 	}),
 	v.transform((base) => ({
+		production: base.production,
 		typescript: !base.noTypescript,
 		browserless: !base.browserOnly,
 		pattern: base.pattern,
@@ -93,15 +93,14 @@ const VitePluginCargoOptionsBaseSchema = v.pipe(
 	})),
 );
 
-const VitePluginCargoOptionsSchema = v.intersect([
-	VitePluginCargoOptionsBaseSchema,
+const UnpluginCargoOptionsSchema = v.intersect([
+	UnpluginCargoOptionsBaseSchema,
 	FeaturesSchema,
 ]);
 
-export const parsePluginOptions = v.parser(VitePluginCargoOptionsSchema);
+export const parsePluginOptions = v.parser(UnpluginCargoOptionsSchema);
 
-// todo: handcraft these types
-export type VitePluginCargoOptions = {
+export type UnpluginCargoOptions = {
 	/**
 	 * @summary
 	 * Pattern of files that could be used as entrypoints.
@@ -110,7 +109,22 @@ export type VitePluginCargoOptions = {
 	 * @example
 	 * `**\/*.rs`
 	 */
-	pattern: StringFilter;
+	pattern:
+		| string
+		| RegExp
+		| Array<string | RegExp>
+		| {
+				include?: string | RegExp | Array<string | RegExp>;
+				exclude?: string | RegExp | Array<string | RegExp>;
+		  };
+
+	/**
+	 * @summary
+	 * Explicitly set production mode. When omitted, falls back to
+	 * `process.env.NODE_ENV === "production"`.
+	 * @default process.env.NODE_ENV === "production"
+	 */
+	production?: boolean;
 
 	/**
 	 * @summary
@@ -151,6 +165,13 @@ export type VitePluginCargoOptions = {
 	 * @example (context) => context.production ? "release" : "test"
 	 */
 	cargoBuildProfile?: string | ((context: { production: boolean }) => string);
+
+	/**
+	 * @summary
+	 * Target triple passed to `cargo build`.
+	 * @default "wasm32-unknown-unknown"
+	 */
+	cargoBuildTarget?: string;
 } & (
 	| {
 			/**
@@ -179,6 +200,6 @@ export type VitePluginCargoOptions = {
 	  }
 );
 
-export type VitePluginCargoOptionsInternal = v.InferOutput<
-	typeof VitePluginCargoOptionsSchema
+export type UnpluginCargoOptionsInternal = v.InferOutput<
+	typeof UnpluginCargoOptionsSchema
 >;
