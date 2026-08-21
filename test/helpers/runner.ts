@@ -9,7 +9,7 @@ export function runBundlerTests(
 	name: string,
 	buildFn: (options: UnpluginCargoOptions) => Promise<string>,
 ) {
-	describe(name, () => {
+	describe.concurrent(name, () => {
 		const fixtureRoots = new Set<string>();
 
 		const buildAndTrack = async (options: UnpluginCargoOptions) => {

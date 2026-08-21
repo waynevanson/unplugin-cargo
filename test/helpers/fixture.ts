@@ -72,14 +72,11 @@ function hashOptions(options: UnpluginCargoOptions): string {
 export async function getFixture(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
-	const testName = expect.getState().currentTestName;
-
-	if (!testName) {
-		throw expect(testName).toBeTruthy();
-	}
-
 	const hash = hashOptions(options);
-	const target = path.join(ROOT, `${hashTestName(testName)}-${hash}`);
+	const target = path.join(
+		ROOT,
+		`${crypto.randomUUID().replace(/-/g, "")}-${hash}`,
+	);
 
 	await fs.rm(target, { recursive: true, force: true });
 	await fs.mkdir(target, { recursive: true });
