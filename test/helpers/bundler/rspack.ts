@@ -4,15 +4,13 @@ import { rspack } from "@rspack/core";
 // @ts-expect-error
 import RspackHtmlPlugin from "@rspack/plugin-html";
 import type { UnpluginCargoOptions } from "../../../dist/index";
-import { clearCargoCache } from "../clear-cargo-cache";
-import { createFixture } from "../fixture";
+import { getFixture } from "../fixture";
 import { importCargo } from "../import-cargo";
 
 export async function buildWithRspack(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
-	await clearCargoCache();
-	const fixture = await createFixture();
+	const fixture = await getFixture(options);
 	const outDir = path.resolve(fixture, "dists", `dist-rspack-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("rspack");

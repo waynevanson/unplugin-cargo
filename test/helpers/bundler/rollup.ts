@@ -3,17 +3,15 @@ import path from "node:path";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import { rollup } from "rollup";
 import type { UnpluginCargoOptions } from "../../../dist/index";
-import { clearCargoCache } from "../clear-cargo-cache";
 import { createHtml } from "../create-html";
-import { createFixture } from "../fixture";
+import { getFixture } from "../fixture";
 import { importCargo } from "../import-cargo";
 import { rollupWasmBindgen } from "../rollup-wasm-bindgen";
 
 export async function buildWithRollup(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
-	await clearCargoCache();
-	const fixture = await createFixture();
+	const fixture = await getFixture(options);
 	const outDir = path.resolve(fixture, "dists", `dist-rollup-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("rollup");

@@ -2,17 +2,15 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { UnpluginCargoOptions } from "../../../dist/index";
-import { clearCargoCache } from "../clear-cargo-cache";
 import { createHtml } from "../create-html";
-import { createFixture } from "../fixture";
+import { getFixture } from "../fixture";
 
 const CARGO = path.resolve(import.meta.dirname, "../../../dist");
 
 export async function buildWithBun(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
-	await clearCargoCache();
-	const fixture = await createFixture();
+	const fixture = await getFixture(options);
 	const outDir = path.resolve(fixture, "dists", `dist-bun-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 

@@ -21,6 +21,11 @@ interface LibraryHashable {
 	libraryFilePath: string;
 	cargoBuildTarget: string;
 	cargoBuildProfile: string;
+	browserless: boolean;
+	typescript: boolean;
+	features:
+		| { allFeatures: true }
+		| { features?: Array<string>; noDefaultFeatures?: boolean };
 }
 
 type Pattern =
@@ -125,25 +130,26 @@ export function unpluginFactory(
 				projectFilePath,
 			});
 
-	const cargoBuildTargetDir = projectMetadata.target_directory;
-	const libraryTargetName = libraryMetadata.target.name;
+			const cargoBuildTargetDir = projectMetadata.target_directory;
+			const libraryTargetName = libraryMetadata.target.name;
 
-	const cargoProfileDir = cargoBuildProfile === "dev" ? "debug" : cargoBuildProfile;
+			const cargoProfileDir =
+				cargoBuildProfile === "dev" ? "debug" : cargoBuildProfile;
 
-	const libraryBuildDir = path.resolve(
-		cargoBuildTargetDir,
-		cargoBuildTarget,
-		cargoProfileDir,
-	);
+			const libraryBuildDir = path.resolve(
+				cargoBuildTargetDir,
+				cargoBuildTarget,
+				cargoProfileDir,
+			);
 
-		cargoBuild({
-			log,
-			cargoBuildTarget,
-			cargoBuildOverrides,
-			cargoBuildProfile,
-			projectFilePath,
-			features: context.features,
-		});
+			cargoBuild({
+				log,
+				cargoBuildTarget,
+				cargoBuildOverrides,
+				cargoBuildProfile,
+				projectFilePath,
+				features: context.features,
+			});
 
 			const wasmFilePath: string = path.resolve(
 				libraryBuildDir,
@@ -168,6 +174,9 @@ export function unpluginFactory(
 				libraryFilePath,
 				cargoBuildTarget,
 				cargoBuildProfile,
+				browserless,
+				typescript,
+				features: context.features,
 			});
 
 			const wasmBindgenOutDir = createLibraryDir(hash);

@@ -2,15 +2,13 @@ import path from "node:path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import webpack from "webpack";
 import type { UnpluginCargoOptions } from "../../../dist/index";
-import { clearCargoCache } from "../clear-cargo-cache";
-import { createFixture } from "../fixture";
+import { getFixture } from "../fixture";
 import { importCargo } from "../import-cargo";
 
 export async function buildWithWebpack(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
-	await clearCargoCache();
-	const fixture = await createFixture();
+	const fixture = await getFixture(options);
 	const outDir = path.resolve(fixture, "dists", `dist-webpack-${Date.now()}`);
 	const cargo = await importCargo("webpack");
 	await new Promise<void>((resolve, reject) => {

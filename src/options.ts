@@ -64,7 +64,8 @@ const CargoBuildProfile = v.optional(
 			CargoBuildProfileFn,
 		]),
 	),
-	() => (args_0: { production: boolean }) => (args_0.production ? "release" : "dev"),
+	() => (args_0: { production: boolean }) =>
+		args_0.production ? "release" : "dev",
 );
 
 const UnpluginCargoOptionsBaseSchema = v.pipe(
