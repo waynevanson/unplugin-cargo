@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { expect } from "vitest";
-import type { UnpluginCargoOptions } from "../../dist/index";
+import type { UnpluginCargoOptions } from "../../src/index";
 
 const SOURCE = path.resolve(import.meta.dirname, "../../fixtures/lib");
 export const ROOT = path.resolve(

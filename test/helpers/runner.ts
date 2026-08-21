@@ -1,6 +1,6 @@
 import path from "node:path";
 import { afterAll, expect, test } from "vitest";
-import type { UnpluginCargoOptions } from "../../dist/index";
+import type { UnpluginCargoOptions } from "../../src/index";
 import { runInBrowser } from "./browser";
 import { cleanupFixture } from "./fixture";
 import { startServer } from "./server";

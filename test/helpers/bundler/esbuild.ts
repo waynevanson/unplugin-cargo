@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import * as esbuild from "esbuild";
-import type { UnpluginCargoOptions } from "../../../dist/index";
+import type { UnpluginCargoOptions } from "../../../src/index";
 import { createHtml } from "../create-html";
 import { findWasmInCache } from "../find-wasm-in-cache";
 import { getFixture } from "../fixture";

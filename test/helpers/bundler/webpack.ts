@@ -1,7 +1,7 @@
 import path from "node:path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import webpack from "webpack";
-import type { UnpluginCargoOptions } from "../../../dist/index";
+import type { UnpluginCargoOptions } from "../../../src/index";
 import { getFixture } from "../fixture";
 import { importCargo } from "../import-cargo";
 

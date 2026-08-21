@@ -3,7 +3,7 @@ import path from "node:path";
 import { rspack } from "@rspack/core";
 // @ts-expect-error
 import RspackHtmlPlugin from "@rspack/plugin-html";
-import type { UnpluginCargoOptions } from "../../../dist/index";
+import type { UnpluginCargoOptions } from "../../../src/index";
 import { getFixture } from "../fixture";
 import { importCargo } from "../import-cargo";
 

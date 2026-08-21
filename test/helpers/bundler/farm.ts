@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import wasm from "vite-plugin-wasm";
-import type { UnpluginCargoOptions } from "../../../dist/index";
+import type { UnpluginCargoOptions } from "../../../src/index";
 import { getFixture } from "../fixture";
 import { importCargo } from "../import-cargo";
 

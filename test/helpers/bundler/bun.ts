@@ -1,11 +1,11 @@
 import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { UnpluginCargoOptions } from "../../../dist/index";
+import type { UnpluginCargoOptions } from "../../../src/index";
 import { createHtml } from "../create-html";
 import { getFixture } from "../fixture";
 
-const CARGO = path.resolve(import.meta.dirname, "../../../dist");
+const CARGO = path.resolve(import.meta.dirname, "../../../src");
 
 export async function buildWithBun(
 	options: UnpluginCargoOptions,
@@ -27,7 +27,7 @@ export async function buildWithBun(
 	const optionsJson = JSON.stringify(serialized);
 
 	const scriptContent = `
-import { cargo } from ${JSON.stringify(path.resolve(CARGO, "esbuild.js"))};
+import { cargo } from ${JSON.stringify(path.resolve(CARGO, "esbuild.ts"))};
 import fs from "node:fs/promises";
 import path from "node:path";
 
