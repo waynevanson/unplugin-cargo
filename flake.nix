@@ -59,8 +59,8 @@
           packages = nodePackages ++ rustPackages;
 
           CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_LINKER = "lld";
-
           PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
+          PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
         };
       }
     );
