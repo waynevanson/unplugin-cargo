@@ -2,7 +2,7 @@ import path from "node:path";
 import { afterAll, expect, test } from "vitest";
 import type { UnpluginCargoOptions } from "../../dist/index";
 import { runInBrowser } from "./browser";
-import { cleanupCache, cleanupFixture } from "./fixture";
+import { cleanupFixture } from "./fixture";
 import { startServer } from "./server";
 
 export function runBundlerTests(
@@ -21,7 +21,6 @@ export function runBundlerTests(
 		for (const root of fixtureRoots) {
 			await cleanupFixture(path.join(root, "dists", "placeholder"));
 		}
-		await cleanupCache();
 	});
 
 	test(`${name}: default options`, async () => {

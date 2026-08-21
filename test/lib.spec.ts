@@ -6,7 +6,7 @@ import wasm from "vite-plugin-wasm";
 import { afterAll, describe, expect, test } from "vitest";
 import { cargo as cargoRollup } from "../src/rollup";
 import { cargo as cargoVite } from "../src/vite";
-import { cleanupCache, cleanupFixture, createFixture } from "./helpers/fixture";
+import { cleanupFixture, createFixture } from "./helpers/fixture";
 
 describe("lib", () => {
 	const fixtureRoots = new Set<string>();
@@ -15,7 +15,6 @@ describe("lib", () => {
 		for (const root of fixtureRoots) {
 			await cleanupFixture(path.join(root, "dists", "placeholder"));
 		}
-		await cleanupCache();
 	});
 
 	test(
