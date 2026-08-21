@@ -1,15 +1,10 @@
-import { chromium, type Browser } from "@playwright/test";
+import { type Browser, chromium } from "@playwright/test";
 
 let browser: Browser | undefined;
 
-const CHROMIUM_PATH =
-	"/nix/store/whxq6a57pq26hwgzmpn7hdsw819dy7kk-playwright-chromium/chrome-linux64/chrome";
-
 export async function getBrowser(): Promise<Browser> {
 	if (!browser) {
-		browser = await chromium.launch({
-			executablePath: CHROMIUM_PATH,
-		});
+		browser = await chromium.launch();
 	}
 	return browser;
 }

@@ -23,7 +23,7 @@
         toolchains = with fenix.packages.${system}; rec {
           system = fromToolchainFile {
             file = ./rust-toolchain.toml;
-            sha256 = "sha256-mvUGEOHYJpn3ikC5hckneuGixaC+yGrkMM/liDIDgoU=";
+            sha256 = "sha256-P30Tm3O7vQAE725YtDCDHGjNrSsfZO4us11UwJGZSJo=";
           };
           wasm = targets.wasm32-unknown-unknown.stable.rust-std;
           combined = combine [
@@ -50,6 +50,7 @@
           corepack_24
           biome
           bun
+          playwright-driver.browsers
         ];
       in
       {
@@ -58,6 +59,8 @@
           packages = nodePackages ++ rustPackages;
 
           CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_LINKER = "lld";
+
+          PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers}";
         };
       }
     );
