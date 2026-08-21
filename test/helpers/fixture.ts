@@ -11,6 +11,14 @@ export const ROOT = path.resolve(
 );
 const CACHE_DIR = path.resolve("node_modules", ".cache", "unplugin-cargo");
 
+function hashTestName(testName: string): string {
+	return crypto
+		.createHash("sha256")
+		.update(testName)
+		.digest("hex")
+		.slice(0, 16);
+}
+
 export async function createFixture(): Promise<string> {
 	const testName = expect.getState().currentTestName;
 
@@ -18,7 +26,7 @@ export async function createFixture(): Promise<string> {
 		throw expect(testName).toBeTruthy();
 	}
 
-	const target = path.join(ROOT, testName.replace(/:/g, "-"));
+	const target = path.join(ROOT, hashTestName(testName));
 
 	await fs.rm(target, { recursive: true, force: true });
 	await fs.mkdir(target, { recursive: true });
@@ -71,7 +79,7 @@ export async function getFixture(
 	}
 
 	const hash = hashOptions(options);
-	const target = path.join(ROOT, `${testName.replace(/:/g, "-")}-${hash}`);
+	const target = path.join(ROOT, `${hashTestName(testName)}-${hash}`);
 
 	await fs.rm(target, { recursive: true, force: true });
 	await fs.mkdir(target, { recursive: true });
