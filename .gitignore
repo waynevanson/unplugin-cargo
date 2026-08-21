@@ -1,8 +1,8 @@
 /.direnv
-/node_modules
-/dist
+node_modules
+.turbo
 /target
-/coverage
-/.turbo
-/fixtures/lib/dists
-/fixtures/.fixtures
+/packages/*/dist
+/packages/*/coverage
+/packages/*/fixtures/lib/dists
+/packages/*/fixtures/.fixtures

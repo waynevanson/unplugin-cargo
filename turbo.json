@@ -1,10 +1,14 @@
 {
 	"$schema": "https://turbo.build/schema.json",
 	"globalDependencies": [
-		"tsconfig.json",
-		"tsup.config.ts",
-		"fixtures/lib/Cargo.toml",
-		"fixtures/lib/Cargo.lock"
+		"packages/unplugin-cargo/tsconfig.json",
+		"packages/unplugin-cargo/tsup.config.ts",
+		"packages/unplugin-cargo/fixtures/lib/Cargo.toml",
+		"packages/unplugin-cargo/fixtures/lib/Cargo.lock"
+	],
+	"globalPassThroughEnv": [
+		"PLAYWRIGHT_BROWSERS_PATH",
+		"PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS"
 	],
 	"tasks": {
 		"build": {
