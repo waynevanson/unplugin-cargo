@@ -1,6 +1,6 @@
 import { test } from "vitest";
+import { buildWithFarm } from "../helpers/bundler";
 import { runBundlerTests } from "../helpers/runner";
-import { buildWithFarm } from "../helpers/bundlers";
 
 // Farm tests skipped due to @farmfe/core library crash:
 // "jsPlugins must exist: Object property 'jsPlugins' type mismatch"

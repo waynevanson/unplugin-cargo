@@ -1,4 +1,4 @@
+import { buildWithRollup } from "../helpers/bundler";
 import { runBundlerTests } from "../helpers/runner";
-import { buildWithRollup } from "../helpers/bundlers";
 
 runBundlerTests("Rollup", buildWithRollup);

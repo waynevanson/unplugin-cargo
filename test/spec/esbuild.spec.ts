@@ -1,4 +1,4 @@
+import { buildWithEsbuild } from "../helpers/bundler";
 import { runBundlerTests } from "../helpers/runner";
-import { buildWithEsbuild } from "../helpers/bundlers";
 
 runBundlerTests("esbuild", buildWithEsbuild);

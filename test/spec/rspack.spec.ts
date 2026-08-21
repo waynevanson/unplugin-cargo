@@ -1,4 +1,4 @@
+import { buildWithRspack } from "../helpers/bundler";
 import { runBundlerTests } from "../helpers/runner";
-import { buildWithRspack } from "../helpers/bundlers";
 
 runBundlerTests("Rspack", buildWithRspack);

@@ -30,9 +30,7 @@ export default async function wasmLoader(this: any, source: Buffer) {
 			const specifiers = Array.from(names.entries())
 				.map(([name, local]) => `${name} as ${local}`)
 				.join(", ");
-			importLines.push(
-				`import { ${specifiers} } from ${JSON.stringify(mod)};`,
-			);
+			importLines.push(`import { ${specifiers} } from ${JSON.stringify(mod)};`);
 		}
 
 		const importObjLines: string[] = [];
@@ -44,10 +42,7 @@ export default async function wasmLoader(this: any, source: Buffer) {
 		}
 
 		const exportLines = exports
-			.map(
-				(exp) =>
-					`export const ${exp.name} = instance.exports.${exp.name};`,
-			)
+			.map((exp) => `export const ${exp.name} = instance.exports.${exp.name};`)
 			.join("\n");
 
 		const code = [
