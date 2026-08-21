@@ -6,17 +6,17 @@ import wasm from "vite-plugin-wasm";
 import { describe, expect, test } from "vitest";
 import { cargo as cargoRollup } from "../src/rollup";
 import { cargo as cargoVite } from "../src/vite";
-
-const FIXTURE = path.resolve(import.meta.dirname, "../fixtures/lib");
+import { createFixture } from "./helpers/fixture";
 
 describe("lib", () => {
 	test(
 		"should bundle rust to wasm with Vite",
 		{ timeout: 60_000 },
 		async () => {
+			const fixture = await createFixture();
 			await expect(
 				build({
-					root: FIXTURE,
+					root: fixture,
 					logLevel: "silent",
 					plugins: [
 						cargoVite({
@@ -26,7 +26,7 @@ describe("lib", () => {
 						wasm(),
 					],
 					build: {
-						outDir: path.resolve(FIXTURE, "dists", "dist-lib"),
+						outDir: path.resolve(fixture, "dists", "dist-lib"),
 						lib: {
 							entry: "./src/lib.rs",
 							formats: ["es"],
@@ -42,8 +42,9 @@ describe("lib", () => {
 		"should transform rust to wasm with Rollup",
 		{ timeout: 60_000 },
 		async () => {
+			const fixture = await createFixture();
 			const bundle = await rollup({
-				input: path.resolve(FIXTURE, "src/lib.rs"),
+				input: path.resolve(fixture, "src/lib.rs"),
 				plugins: [
 					cargoRollup({
 						pattern: "**/src/lib.rs",

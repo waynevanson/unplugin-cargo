@@ -1,19 +1,19 @@
-import path from "node:path";
-import fs from "node:fs/promises";
 import { execFile } from "node:child_process";
-import { build } from "vite";
-import wasm from "vite-plugin-wasm";
-import { rollup } from "rollup";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
-import webpack from "webpack";
-import HtmlWebpackPlugin from "html-webpack-plugin";
 import { rspack } from "@rspack/core";
-// @ts-ignore
+// @ts-expect-error
 import RspackHtmlPlugin from "@rspack/plugin-html";
 import * as esbuild from "esbuild";
-import { type UnpluginCargoOptions } from "../../dist/index";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import { rollup } from "rollup";
+import { build } from "vite";
+import wasm from "vite-plugin-wasm";
+import webpack from "webpack";
+import type { UnpluginCargoOptions } from "../../dist/index";
+import { createFixture } from "./fixture";
 
-const FIXTURE = path.resolve(import.meta.dirname, "../../fixtures/lib");
 const CARGO = path.resolve(import.meta.dirname, "../../dist");
 
 async function importCargo(bundler: string) {
@@ -84,16 +84,13 @@ function rollupWasmBindgen() {
 				const entries = Array.from(names.entries())
 					.map(([name, local]) => `${JSON.stringify(name)}: ${local}`)
 					.join(", ");
-				importObjLines.push(
-					`${JSON.stringify(mod)}: { ${entries} }`,
-				);
+				importObjLines.push(`${JSON.stringify(mod)}: { ${entries} }`);
 			}
 
 			// Build exports
 			const exportLines = exports
 				.map(
-					(exp) =>
-						`export const ${exp.name} = instance.exports.${exp.name};`,
+					(exp) => `export const ${exp.name} = instance.exports.${exp.name};`,
 				)
 				.join("\n");
 
@@ -113,10 +110,11 @@ export async function buildWithVite(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, "dists", `dist-vite-${Date.now()}`);
+	const fixture = await createFixture();
+	const outDir = path.resolve(fixture, "dists", `dist-vite-${Date.now()}`);
 	const cargo = await importCargo("vite");
 	await build({
-		root: FIXTURE,
+		root: fixture,
 		logLevel: "silent",
 		plugins: [cargo(options), wasm()],
 		build: {
@@ -131,13 +129,14 @@ export async function buildWithRollup(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, "dists", `dist-rollup-${Date.now()}`);
+	const fixture = await createFixture();
+	const outDir = path.resolve(fixture, "dists", `dist-rollup-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("rollup");
 	const bundle = await rollup({
-		input: path.resolve(FIXTURE, "src/index.js"),
+		input: path.resolve(fixture, "src/index.js"),
 		plugins: [
-			// @ts-ignore
+			// @ts-expect-error
 			cargo(options),
 			rollupWasmBindgen(),
 			nodeResolve(),
@@ -156,14 +155,15 @@ export async function buildWithWebpack(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, "dists", `dist-webpack-${Date.now()}`);
+	const fixture = await createFixture();
+	const outDir = path.resolve(fixture, "dists", `dist-webpack-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("webpack");
 	await new Promise<void>((resolve, reject) => {
 		webpack(
 			{
 				mode: "production",
-				entry: path.resolve(FIXTURE, "src/index.js"),
+				entry: path.resolve(fixture, "src/index.js"),
 				output: {
 					path: outDir,
 					filename: "index.js",
@@ -185,7 +185,7 @@ export async function buildWithWebpack(
 					],
 				},
 				plugins: [
-					// @ts-ignore
+					// @ts-expect-error
 					cargo(options),
 					new HtmlWebpackPlugin({
 						templateContent: `<!doctype html>
@@ -238,11 +238,12 @@ export async function buildWithEsbuild(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, "dists", `dist-esbuild-${Date.now()}`);
+	const fixture = await createFixture();
+	const outDir = path.resolve(fixture, "dists", `dist-esbuild-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("esbuild");
 	await esbuild.build({
-		entryPoints: [path.resolve(FIXTURE, "src/index.js")],
+		entryPoints: [path.resolve(fixture, "src/index.js")],
 		bundle: true,
 		format: "esm",
 		outdir: outDir,
@@ -259,9 +260,7 @@ export async function buildWithEsbuild(
 							};
 						}
 						// Try to find the wasm file in the unplugin cache
-						const wasmPath = await findWasmInCache(
-							path.basename(realPath),
-						);
+						const wasmPath = await findWasmInCache(path.basename(realPath));
 						if (wasmPath) {
 							return {
 								path: wasmPath,
@@ -270,77 +269,66 @@ export async function buildWithEsbuild(
 						}
 						return null;
 					});
-					build.onLoad(
-						{ filter: /.*/, namespace: "wasm" },
-						async (args) => {
-							const buffer = await fs.readFile(args.path);
-							const module = new WebAssembly.Module(buffer);
-							const imports = WebAssembly.Module.imports(module);
-							const exports = WebAssembly.Module.exports(module);
+					build.onLoad({ filter: /.*/, namespace: "wasm" }, async (args) => {
+						const buffer = await fs.readFile(args.path);
+						const module = new WebAssembly.Module(buffer);
+						const imports = WebAssembly.Module.imports(module);
+						const exports = WebAssembly.Module.exports(module);
 
-							const importMap = new Map<
-								string,
-								Map<string, string>
-							>();
-							for (const imp of imports) {
-								if (!importMap.has(imp.module)) {
-									importMap.set(imp.module, new Map());
-								}
-								importMap
-									.get(imp.module)!
-									.set(
-										imp.name,
-										`_${imp.module.replace(/[^a-zA-Z0-9]/g, "_")}_${imp.name}`,
-									);
+						const importMap = new Map<string, Map<string, string>>();
+						for (const imp of imports) {
+							if (!importMap.has(imp.module)) {
+								importMap.set(imp.module, new Map());
 							}
-
-							const importLines: string[] = [];
-							for (const [mod, names] of importMap) {
-								const specifiers = Array.from(names.entries())
-									.map(([name, local]) => `${name} as ${local}`)
-									.join(", ");
-								importLines.push(
-									`import { ${specifiers} } from ${JSON.stringify(mod)};`,
+							importMap
+								.get(imp.module)!
+								.set(
+									imp.name,
+									`_${imp.module.replace(/[^a-zA-Z0-9]/g, "_")}_${imp.name}`,
 								);
-							}
+						}
 
-							const importObjLines: string[] = [];
-							for (const [mod, names] of importMap) {
-								const entries = Array.from(names.entries())
-									.map(
-										([name, local]) =>
-											`${JSON.stringify(name)}: ${local}`,
-									)
-									.join(", ");
-								importObjLines.push(
-									`${JSON.stringify(mod)}: { ${entries} }`,
-								);
-							}
+						const importLines: string[] = [];
+						for (const [mod, names] of importMap) {
+							const specifiers = Array.from(names.entries())
+								.map(([name, local]) => `${name} as ${local}`)
+								.join(", ");
+							importLines.push(
+								`import { ${specifiers} } from ${JSON.stringify(mod)};`,
+							);
+						}
 
-							const exportLines = exports
-								.map(
-									(exp) =>
-										`export const ${exp.name} = instance.exports.${exp.name};`,
-								)
-								.join("\n");
+						const importObjLines: string[] = [];
+						for (const [mod, names] of importMap) {
+							const entries = Array.from(names.entries())
+								.map(([name, local]) => `${JSON.stringify(name)}: ${local}`)
+								.join(", ");
+							importObjLines.push(`${JSON.stringify(mod)}: { ${entries} }`);
+						}
 
-							const code = [
-								...importLines,
-								`const module_ = new WebAssembly.Module(new Uint8Array([${Array.from(buffer).join(",")}]));`,
-								`const instance = new WebAssembly.Instance(module_, { ${importObjLines.join(", ")} });`,
-								exportLines,
-							].join("\n");
+						const exportLines = exports
+							.map(
+								(exp) =>
+									`export const ${exp.name} = instance.exports.${exp.name};`,
+							)
+							.join("\n");
 
-							return {
-								contents: code,
-								loader: "js" as const,
-								resolveDir: path.dirname(args.path),
-							};
-						},
-					);
+						const code = [
+							...importLines,
+							`const module_ = new WebAssembly.Module(new Uint8Array([${Array.from(buffer).join(",")}]));`,
+							`const instance = new WebAssembly.Instance(module_, { ${importObjLines.join(", ")} });`,
+							exportLines,
+						].join("\n");
+
+						return {
+							contents: code,
+							loader: "js" as const,
+							resolveDir: path.dirname(args.path),
+						};
+					});
 				},
 			},
-			// @ts-ignore
+			// @ts-expect-error
 			cargo(options),
 		],
 	});
@@ -352,14 +340,15 @@ export async function buildWithRspack(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, "dists", `dist-rspack-${Date.now()}`);
+	const fixture = await createFixture();
+	const outDir = path.resolve(fixture, "dists", `dist-rspack-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("rspack");
 	await new Promise<void>((resolve, reject) => {
 		rspack(
 			{
 				mode: "production",
-				entry: path.resolve(FIXTURE, "src/index.js"),
+				entry: path.resolve(fixture, "src/index.js"),
 				output: {
 					path: outDir,
 					filename: "index.js",
@@ -381,11 +370,11 @@ export async function buildWithRspack(
 					],
 				},
 				plugins: [
-					// @ts-ignore
+					// @ts-expect-error
 					cargo(options),
-					// @ts-ignore
+					// @ts-expect-error
 					new RspackHtmlPlugin({
-						template: path.resolve(FIXTURE, "index.html"),
+						template: path.resolve(fixture, "index.html"),
 					}),
 				],
 			},
@@ -403,16 +392,17 @@ export async function buildWithRolldown(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, "dists", `dist-rolldown-${Date.now()}`);
+	const fixture = await createFixture();
+	const outDir = path.resolve(fixture, "dists", `dist-rolldown-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("rollup"); // rolldown is rollup-compatible
 	const { rolldown } = await import("rolldown");
 	const bundle = await rolldown({
-		input: path.resolve(FIXTURE, "src/index.js"),
+		input: path.resolve(fixture, "src/index.js"),
 		plugins: [
-			// @ts-ignore
+			// @ts-expect-error
 			cargo(options),
-			// @ts-ignore
+			// @ts-expect-error
 			rollupWasmBindgen(),
 			nodeResolve(),
 		],
@@ -429,23 +419,24 @@ export async function buildWithFarm(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, "dists", `dist-farm-${Date.now()}`);
+	const fixture = await createFixture();
+	const outDir = path.resolve(fixture, "dists", `dist-farm-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("vite"); // Farm is vite-compatible
 	const { createCompiler } = await import("@farmfe/core");
 	const compiler = await createCompiler({
 		compilation: {
 			input: {
-				index: path.resolve(FIXTURE, "index.html"),
+				index: path.resolve(fixture, "index.html"),
 			},
 			output: {
 				path: outDir,
 			},
 		},
 		plugins: [
-			// @ts-ignore
+			// @ts-expect-error
 			cargo(options),
-			// @ts-ignore
+			// @ts-expect-error
 			wasm(),
 		],
 	});
@@ -458,7 +449,8 @@ export async function buildWithBun(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, "dists", `dist-bun-${Date.now()}`);
+	const fixture = await createFixture();
+	const outDir = path.resolve(fixture, "dists", `dist-bun-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 
 	// Serialize options for the Bun subprocess.
@@ -561,7 +553,7 @@ function bunWasmPlugin() {
 }
 
 const result = await Bun.build({
-	entrypoints: [${JSON.stringify(path.resolve(FIXTURE, "src/index.js"))}],
+	entrypoints: [${JSON.stringify(path.resolve(fixture, "src/index.js"))}],
 	outdir: ${JSON.stringify(outDir)},
 	plugins: [cargo(options), bunWasmPlugin()],
 });
