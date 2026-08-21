@@ -113,7 +113,7 @@ export async function buildWithVite(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, `dist-vite-${Date.now()}`);
+	const outDir = path.resolve(FIXTURE, "dists", `dist-vite-${Date.now()}`);
 	const cargo = await importCargo("vite");
 	await build({
 		root: FIXTURE,
@@ -131,7 +131,7 @@ export async function buildWithRollup(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, `dist-rollup-${Date.now()}`);
+	const outDir = path.resolve(FIXTURE, "dists", `dist-rollup-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("rollup");
 	const bundle = await rollup({
@@ -156,7 +156,7 @@ export async function buildWithWebpack(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, `dist-webpack-${Date.now()}`);
+	const outDir = path.resolve(FIXTURE, "dists", `dist-webpack-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("webpack");
 	await new Promise<void>((resolve, reject) => {
@@ -238,7 +238,7 @@ export async function buildWithEsbuild(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, `dist-esbuild-${Date.now()}`);
+	const outDir = path.resolve(FIXTURE, "dists", `dist-esbuild-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("esbuild");
 	await esbuild.build({
@@ -352,7 +352,7 @@ export async function buildWithRspack(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, `dist-rspack-${Date.now()}`);
+	const outDir = path.resolve(FIXTURE, "dists", `dist-rspack-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("rspack");
 	await new Promise<void>((resolve, reject) => {
@@ -403,7 +403,7 @@ export async function buildWithRolldown(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, `dist-rolldown-${Date.now()}`);
+	const outDir = path.resolve(FIXTURE, "dists", `dist-rolldown-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("rollup"); // rolldown is rollup-compatible
 	const { rolldown } = await import("rolldown");
@@ -429,7 +429,7 @@ export async function buildWithFarm(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, `dist-farm-${Date.now()}`);
+	const outDir = path.resolve(FIXTURE, "dists", `dist-farm-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("vite"); // Farm is vite-compatible
 	const { createCompiler } = await import("@farmfe/core");
@@ -458,7 +458,7 @@ export async function buildWithBun(
 	options: UnpluginCargoOptions,
 ): Promise<string> {
 	await clearCargoCache();
-	const outDir = path.resolve(FIXTURE, `dist-bun-${Date.now()}`);
+	const outDir = path.resolve(FIXTURE, "dists", `dist-bun-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 
 	// Serialize options for the Bun subprocess.

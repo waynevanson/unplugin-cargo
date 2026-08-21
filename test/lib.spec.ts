@@ -26,6 +26,7 @@ describe("lib", () => {
 						wasm(),
 					],
 					build: {
+						outDir: path.resolve(FIXTURE, "dists", "dist-lib"),
 						lib: {
 							entry: "./src/lib.rs",
 							formats: ["es"],
