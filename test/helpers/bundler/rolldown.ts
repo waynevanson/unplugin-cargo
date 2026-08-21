@@ -1,6 +1,5 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
 import type { UnpluginCargoOptions } from "../../../dist/index";
 import { createHtml } from "../create-html";
 import { getFixture } from "../fixture";
@@ -22,8 +21,11 @@ export async function buildWithRolldown(
 			cargo(options),
 			// @ts-expect-error
 			rollupWasmBindgen(),
-			nodeResolve(),
 		],
+		// @ts-expect-error rolldown supports `checks` but types lag behind
+		checks: {
+			pluginTimings: false,
+		},
 	});
 	await bundle.write({
 		format: "esm",

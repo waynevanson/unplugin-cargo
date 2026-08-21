@@ -5,7 +5,10 @@ import { expect } from "vitest";
 import type { UnpluginCargoOptions } from "../../dist/index";
 
 const SOURCE = path.resolve(import.meta.dirname, "../../fixtures/lib");
-export const ROOT = path.resolve(import.meta.dirname, "../../fixtures/.fixtures");
+export const ROOT = path.resolve(
+	import.meta.dirname,
+	"../../fixtures/.fixtures",
+);
 const CACHE_DIR = path.resolve("node_modules", ".cache", "unplugin-cargo");
 
 export async function createFixture(): Promise<string> {
