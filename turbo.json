@@ -3,8 +3,8 @@
 	"globalDependencies": [
 		"tsconfig.json",
 		"tsup.config.ts",
-		"Cargo.toml",
-		"Cargo.lock"
+		"fixtures/lib/Cargo.toml",
+		"fixtures/lib/Cargo.lock"
 	],
 	"tasks": {
 		"build": {

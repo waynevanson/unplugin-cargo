@@ -13,3 +13,15 @@ crate-type = ['cdylib']
 
 [dependencies]
 wasm-bindgen = "=0.2.121"
+
+[workspace]
+members = ["."]
+resolver = "3"
+
+[profile.jesus]
+inherits = "dev"
+strip = "debuginfo"
+
+[profile.custom-profile]
+inherits = "dev"
+opt-level = 1
