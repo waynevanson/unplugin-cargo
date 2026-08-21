@@ -43,14 +43,11 @@ export function findLibraryMetadata(options: {
 		);
 	}
 
-	const TargetSchema = v.object({
-		name: v.string(),
-		src_path: v.literal(options.libraryFilePath),
-		crate_types: v.tuple([v.literal("cdylib")]),
-	});
-
-	const target = findOnlyOne(package_?.targets ?? [], (target) =>
-		v.is(TargetSchema, target),
+	const target = findOnlyOne(
+		package_?.targets ?? [],
+		(target) =>
+			target.src_path === options.libraryFilePath &&
+			target.crate_types.includes("cdylib"),
 	);
 
 	if (target === undefined) {
@@ -81,7 +78,7 @@ export const MetadataSchema = v.object({
 			dependencies: v.array(
 				v.object({
 					name: v.string(),
-					source: v.string(),
+					source: v.nullable(v.string()),
 					req: v.string(),
 					kind: v.nullable(v.string()),
 				}),

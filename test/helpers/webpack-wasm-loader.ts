@@ -1,10 +1,14 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import type { LoaderContext } from "webpack";
 
-export default async function wasmLoader(this: any, source: Buffer) {
+export default async function wasmLoader(
+	this: LoaderContext<unknown>,
+	_source: Buffer,
+) {
 	const callback = this.async();
 	const wasmPath = this.resourcePath;
-	const depsDir = path.dirname(wasmPath);
+	const _depsDir = path.dirname(wasmPath);
 
 	try {
 		const buffer = await readFile(wasmPath);
@@ -18,8 +22,8 @@ export default async function wasmLoader(this: any, source: Buffer) {
 				importMap.set(imp.module, new Map());
 			}
 			importMap
-				.get(imp.module)!
-				.set(
+				.get(imp.module)
+				?.set(
 					imp.name,
 					`_${imp.module.replace(/[^a-zA-Z0-9]/g, "_")}_${imp.name}`,
 				);

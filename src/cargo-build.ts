@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import type pino from "pino";
-import type { CargoBuildOverrides } from "./plugin-options";
+import type { CargoBuildOverrides } from "./options";
 import { isString } from "./utils";
 
 export function cargoBuild(context: {
@@ -9,9 +9,11 @@ export function cargoBuild(context: {
 	log: pino.Logger;
 	cargoBuildTarget: string;
 	cargoBuildProfile: string;
-	features:
-		| { allFeatures: true }
-		| { features?: Array<string>; noDefaultFeatures?: boolean };
+	features: {
+		allFeatures: boolean;
+		features?: Array<string>;
+		noDefaultFeatures: boolean;
+	};
 }) {
 	// create `.wasm` from `.rs`
 	let args = [
@@ -24,7 +26,7 @@ export function cargoBuild(context: {
 		`--profile=${context.cargoBuildProfile}`,
 	].filter(isString);
 
-	if ("allFeatures" in context.features) {
+	if (context.features.allFeatures) {
 		args.push("--all-features");
 	} else {
 		if (context.features.noDefaultFeatures) {
@@ -46,6 +48,6 @@ export function cargoBuild(context: {
 
 	execFileSync("cargo", args, {
 		encoding: "utf-8",
-		stdio: ["ignore", "pipe", "ignore"],
+		stdio: ["ignore", "pipe", "pipe"],
 	});
 }

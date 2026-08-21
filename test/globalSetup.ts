@@ -1,4 +1,6 @@
 import { execFileSync } from "node:child_process";
+import { closeBrowser } from "./helpers/browser";
+import { cleanupAllFixtures, cleanupCache } from "./helpers/fixture";
 
 export function setup() {
 	execFileSync("pnpm", ["run", "build"], {
@@ -6,6 +8,8 @@ export function setup() {
 	});
 }
 
-export function teardown() {
-	// no-op
+export async function teardown() {
+	await closeBrowser();
+	await cleanupAllFixtures();
+	await cleanupCache();
 }

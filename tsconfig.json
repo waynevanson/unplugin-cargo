@@ -6,7 +6,8 @@
 		"target": "esnext",
 		"outDir": "dist",
 		"declaration": true,
-		"declarationDir": "dist"
+		"declarationDir": "dist",
+		"skipLibCheck": true
 	},
 	"include": ["src"]
 }

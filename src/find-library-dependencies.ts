@@ -4,6 +4,7 @@ import path from "node:path";
 // todo: instead of watching just dependencies,
 // we need to watch all files and trigger rebuild when the dependencies change.
 export async function findLibraryDependencies(options: {
+	projectRoot: string;
 	libraryDepsDir: string;
 	libraryTargetName: string;
 }) {
@@ -16,7 +17,7 @@ export async function findLibraryDependencies(options: {
 		encoding: "utf8",
 	});
 
-	const graph = createGraphFromDependencies(dependencies);
+	const graph = createGraphFromDependencies(dependencies, options.projectRoot);
 
 	const neighboursEntry = path.resolve(
 		options.libraryDepsDir,
@@ -28,18 +29,39 @@ export async function findLibraryDependencies(options: {
 	return neighbours;
 }
 
-export function createGraphFromDependencies(contents: string) {
+function splitTargets(targets: string): Array<string> {
+	return targets
+		.split(/(?<!\\)\s+/)
+		.map((target) => target.replace(/\\ /g, " "));
+}
+
+export function createGraphFromDependencies(
+	contents: string,
+	projectRoot: string,
+) {
 	return new Map(
 		contents
 			.split("\n")
 			.filter(Boolean)
 			.map((line) => {
-				const [source, targets] = line.split(": ");
+				const separator = line.indexOf(": ");
+				if (separator === -1) {
+					return null;
+				}
+
+				const source = line.slice(0, separator);
+				const targets = line.slice(separator + 2);
+
 				return [
-					path.resolve(source),
-					new Set(targets?.split(" ").map((a) => path.resolve(a)) ?? []),
+					path.resolve(projectRoot, source),
+					new Set(
+						splitTargets(targets).map((target) =>
+							path.resolve(projectRoot, target),
+						),
+					),
 				] as const;
-			}),
+			})
+			.filter((entry): entry is NonNullable<typeof entry> => entry !== null),
 	);
 }
 
@@ -51,22 +73,20 @@ function findAllDescendants(start: string, graph: Map<string, Set<string>>) {
 		throw new Error(`Expect the start value to exist in the dependency graph`);
 	}
 
-	const sources = new Set<string>(initials);
+	const queue = Array.from(initials);
 
-	while (sources.size > 0) {
-		for (const source of sources) {
-			// move from sources into collected
-			collecteds.add(source);
-			sources.delete(source);
+	while (queue.length > 0) {
+		const source = queue.shift();
+		if (source === undefined || collecteds.has(source)) {
+			continue;
+		}
 
-			const targets = graph.get(source) ?? new Set();
+		collecteds.add(source);
 
-			// filter out targets that may have been traversed
-			const uncollecteds = targets.difference(collecteds);
-
-			// queue files to be collected
-			for (const uncollected of uncollecteds) {
-				sources.add(uncollected);
+		const targets = graph.get(source) ?? new Set();
+		for (const target of targets) {
+			if (!collecteds.has(target)) {
+				queue.push(target);
 			}
 		}
 	}

@@ -6,6 +6,14 @@ const builtInNodeModules = [
 	...builtinModules.map((builtinModule) => `node:${builtinModule}`),
 ];
 
+const dependencies = [
+	"node-object-hash",
+	"picomatch",
+	"pino",
+	"unplugin",
+	"valibot",
+];
+
 export default defineConfig({
 	entry: {
 		index: "src/index.ts",
@@ -20,5 +28,5 @@ export default defineConfig({
 	sourcemap: true,
 	splitting: false,
 	clean: true,
-	external: [...builtInNodeModules, /^node_modules/],
+	external: [...builtInNodeModules, ...dependencies],
 });

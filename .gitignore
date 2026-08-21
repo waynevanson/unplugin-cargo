@@ -5,4 +5,4 @@
 /coverage
 /.turbo
 /fixtures/lib/dists
-/fixtures/fixture
+/fixtures/.fixtures

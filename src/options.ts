@@ -13,17 +13,6 @@ const logLevel = v.picklist([
 
 const enable = v.optional(v.boolean(), false);
 
-const FeaturesSchema = v.pipe(
-	v.union([
-		v.object({ allFeatures: v.literal(true) }),
-		v.object({
-			features: v.optional(v.array(v.string())),
-			noDefaultFeatures: enable,
-		}),
-	]),
-	v.transform((features) => ({ features })),
-);
-
 const PatternSchema = v.union([v.string(), v.instance(RegExp)]);
 const MaybeArraySchema = <TSchema extends v.GenericSchema>(schema: TSchema) =>
 	v.union([schema, v.array(schema)]);
@@ -68,35 +57,68 @@ const CargoBuildProfile = v.optional(
 		args_0.production ? "release" : "dev",
 );
 
-const UnpluginCargoOptionsBaseSchema = v.pipe(
-	v.object({
-		pattern: PatternFilterSchema,
-		production: v.optional(v.boolean()),
-		logLevel: v.optional(logLevel, "silent"),
-		noTypescript: enable,
-		browserOnly: enable,
-		cargoBuildOverrides: CargoBuildOverridesSchema,
-		cargoBuildProfile: CargoBuildProfile,
-		cargoBuildTarget: v.optional(v.string(), "wasm32-unknown-unknown"),
-	}),
-	v.transform((base) => ({
-		production: base.production,
-		typescript: !base.noTypescript,
-		browserless: !base.browserOnly,
-		pattern: base.pattern,
-		cargoBuildOverrides: base.cargoBuildOverrides,
-		logLevel: base.logLevel,
-		cargoBuildProfile: base.cargoBuildProfile,
-		cargoBuildTarget: base.cargoBuildTarget,
+const BaseFieldsSchema = v.object({
+	pattern: PatternFilterSchema,
+	production: v.optional(v.boolean()),
+	logLevel: v.optional(logLevel, "silent"),
+	noTypescript: enable,
+	browserOnly: enable,
+	cargoBuildOverrides: CargoBuildOverridesSchema,
+	cargoBuildProfile: CargoBuildProfile,
+	cargoBuildTarget: v.optional(v.string(), "wasm32-unknown-unknown"),
+});
+
+const UnpluginCargoOptionsSchema = v.pipe(
+	v.union([
+		v.object({ ...BaseFieldsSchema.entries, allFeatures: v.literal(true) }),
+		v.object({
+			...BaseFieldsSchema.entries,
+			features: v.optional(v.array(v.string())),
+			noDefaultFeatures: enable,
+		}),
+	]),
+	v.transform((options) => ({
+		production: options.production,
+		typescript: !options.noTypescript,
+		browserless: !options.browserOnly,
+		pattern: options.pattern,
+		cargoBuildOverrides: options.cargoBuildOverrides,
+		logLevel: options.logLevel,
+		cargoBuildProfile: options.cargoBuildProfile,
+		cargoBuildTarget: options.cargoBuildTarget,
+		features:
+			"allFeatures" in options
+				? {
+						allFeatures: true as const,
+						features: undefined,
+						noDefaultFeatures: false as const,
+					}
+				: {
+						allFeatures: false as const,
+						features: options.features,
+						noDefaultFeatures: options.noDefaultFeatures,
+					},
 	})),
 );
 
-const UnpluginCargoOptionsSchema = v.intersect([
-	UnpluginCargoOptionsBaseSchema,
-	FeaturesSchema,
-]);
+export type UnpluginCargoOptionsInternal = {
+	production: boolean | undefined;
+	typescript: boolean;
+	browserless: boolean;
+	pattern: UnpluginCargoOptions["pattern"];
+	cargoBuildOverrides: CargoBuildOverrides;
+	logLevel: LevelWithSilent;
+	cargoBuildProfile: (context: { production: boolean }) => string;
+	cargoBuildTarget: string;
+	features: {
+		allFeatures: boolean;
+		features?: Array<string>;
+		noDefaultFeatures: boolean;
+	};
+};
 
-export const parsePluginOptions = v.parser(UnpluginCargoOptionsSchema);
+export const parsePluginOptions = (input: unknown) =>
+	v.parse(UnpluginCargoOptionsSchema, input);
 
 export type UnpluginCargoOptions = {
 	/**
@@ -197,7 +219,3 @@ export type UnpluginCargoOptions = {
 			features?: Array<string>;
 	  }
 );
-
-export type UnpluginCargoOptionsInternal = v.InferOutput<
-	typeof UnpluginCargoOptionsSchema
->;

@@ -5,7 +5,8 @@ import { expect } from "vitest";
 import type { UnpluginCargoOptions } from "../../dist/index";
 
 const SOURCE = path.resolve(import.meta.dirname, "../../fixtures/lib");
-const ROOT = path.resolve(import.meta.dirname, "../../fixtures/fixture");
+export const ROOT = path.resolve(import.meta.dirname, "../../fixtures/.fixtures");
+const CACHE_DIR = path.resolve("node_modules", ".cache", "unplugin-cargo");
 
 export async function createFixture(): Promise<string> {
 	const testName = expect.getState().currentTestName;
@@ -70,6 +71,20 @@ export async function getFixture(
 }
 
 const SKIP = new Set(["target", "dist", "dists"]);
+
+export async function cleanupFixture(outDir: string): Promise<void> {
+	const distsDir = path.dirname(outDir);
+	const fixtureRoot = path.dirname(distsDir);
+	await fs.rm(fixtureRoot, { recursive: true, force: true });
+}
+
+export async function cleanupCache(): Promise<void> {
+	await fs.rm(CACHE_DIR, { recursive: true, force: true });
+}
+
+export async function cleanupAllFixtures(): Promise<void> {
+	await fs.rm(ROOT, { recursive: true, force: true });
+}
 
 async function copyDirectory(source: string, target: string) {
 	const entries = await fs.readdir(source, { withFileTypes: true });

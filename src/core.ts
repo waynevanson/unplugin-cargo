@@ -9,11 +9,7 @@ import { findLibraryDependencies } from "./find-library-dependencies";
 import { findProjectFilePath } from "./find-project-file-path";
 import { HashSet } from "./hash-set";
 import { findLibraryMetadata, findProjectMetadata } from "./metadata";
-import {
-	parsePluginOptions,
-	type UnpluginCargoOptions,
-	type UnpluginCargoOptionsInternal,
-} from "./options";
+import { parsePluginOptions, type UnpluginCargoOptions } from "./options";
 import { createLibraryDir, isString } from "./utils";
 
 interface LibraryHashable {
@@ -23,9 +19,11 @@ interface LibraryHashable {
 	cargoBuildProfile: string;
 	browserless: boolean;
 	typescript: boolean;
-	features:
-		| { allFeatures: true }
-		| { features?: Array<string>; noDefaultFeatures?: boolean };
+	features: {
+		allFeatures: boolean;
+		features?: Array<string>;
+		noDefaultFeatures: boolean;
+	};
 }
 
 type Pattern =
@@ -46,7 +44,7 @@ function normalizePatterns(
 
 function matchesSinglePattern(id: string, pattern: string | RegExp): boolean {
 	if (typeof pattern === "string") {
-		return picomatch.isMatch(id, pattern);
+		return picomatch.isMatch(id, pattern, { dot: true });
 	}
 	return pattern.test(id);
 }
@@ -70,7 +68,7 @@ function matchesPattern(id: string, pattern: Pattern): boolean {
 	return included && !excluded;
 }
 
-function resolveProduction(options: UnpluginCargoOptionsInternal): boolean {
+function resolveProduction(options: { production?: boolean }): boolean {
 	if (options.production !== undefined) return options.production;
 	return process.env.NODE_ENV === "production";
 }
@@ -122,6 +120,10 @@ export function unpluginFactory(
 			const cargoBuildProfile = context.cargoBuildProfile({ production });
 
 			const projectFilePath = findProjectFilePath(libraryFilePath, log);
+
+			if (typeof this.addWatchFile === "function") {
+				this.addWatchFile(projectFilePath);
+			}
 			const projectMetadata = findProjectMetadata(projectFilePath, log);
 
 			const libraryMetadata = findLibraryMetadata({
@@ -159,6 +161,7 @@ export function unpluginFactory(
 			const libraryDepsDir = path.resolve(libraryBuildDir, "deps");
 
 			const libraryFileDependencies = await findLibraryDependencies({
+				projectRoot: path.dirname(projectFilePath),
 				libraryDepsDir,
 				libraryTargetName,
 			});
@@ -270,5 +273,8 @@ export function buildWasmBindgen(input: {
 
 	input.log.debug({ args }, "wasm-bindgen");
 
-	execFileSync("wasm-bindgen", args);
+	execFileSync("wasm-bindgen", args, {
+		encoding: "utf-8",
+		stdio: ["ignore", "pipe", "pipe"],
+	});
 }

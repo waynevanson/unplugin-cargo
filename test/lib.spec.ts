@@ -3,17 +3,27 @@ import { nodeResolve } from "@rollup/plugin-node-resolve";
 import { rollup } from "rollup";
 import { build } from "vite";
 import wasm from "vite-plugin-wasm";
-import { describe, expect, test } from "vitest";
+import { afterAll, describe, expect, test } from "vitest";
 import { cargo as cargoRollup } from "../src/rollup";
 import { cargo as cargoVite } from "../src/vite";
-import { createFixture } from "./helpers/fixture";
+import { cleanupCache, cleanupFixture, createFixture } from "./helpers/fixture";
 
 describe("lib", () => {
+	const fixtureRoots = new Set<string>();
+
+	afterAll(async () => {
+		for (const root of fixtureRoots) {
+			await cleanupFixture(path.join(root, "dists", "placeholder"));
+		}
+		await cleanupCache();
+	});
+
 	test(
 		"should bundle rust to wasm with Vite",
 		{ timeout: 60_000 },
 		async () => {
 			const fixture = await createFixture();
+			fixtureRoots.add(fixture);
 			await expect(
 				build({
 					root: fixture,
@@ -43,6 +53,7 @@ describe("lib", () => {
 		{ timeout: 60_000 },
 		async () => {
 			const fixture = await createFixture();
+			fixtureRoots.add(fixture);
 			const bundle = await rollup({
 				input: path.resolve(fixture, "src/lib.rs"),
 				plugins: [

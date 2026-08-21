@@ -1,14 +1,31 @@
-import { expect, test } from "vitest";
+import path from "node:path";
+import { afterAll, expect, test } from "vitest";
 import type { UnpluginCargoOptions } from "../../dist/index";
 import { runInBrowser } from "./browser";
+import { cleanupCache, cleanupFixture } from "./fixture";
 import { startServer } from "./server";
 
 export function runBundlerTests(
 	name: string,
 	buildFn: (options: UnpluginCargoOptions) => Promise<string>,
 ) {
+	const fixtureRoots = new Set<string>();
+
+	const buildAndTrack = async (options: UnpluginCargoOptions) => {
+		const outDir = await buildFn(options);
+		fixtureRoots.add(path.dirname(path.dirname(outDir)));
+		return outDir;
+	};
+
+	afterAll(async () => {
+		for (const root of fixtureRoots) {
+			await cleanupFixture(path.join(root, "dists", "placeholder"));
+		}
+		await cleanupCache();
+	});
+
 	test(`${name}: default options`, async () => {
-		const outDir = await buildFn({ pattern: "**/src/lib.rs" });
+		const outDir = await buildAndTrack({ pattern: "**/src/lib.rs" });
 		const { url, close } = await startServer(outDir);
 		try {
 			const result = await runInBrowser(url);
@@ -20,7 +37,7 @@ export function runBundlerTests(
 	});
 
 	test(`${name}: features: ['multiply']`, async () => {
-		const outDir = await buildFn({
+		const outDir = await buildAndTrack({
 			pattern: "**/src/lib.rs",
 			features: ["multiply"],
 		});
@@ -36,7 +53,7 @@ export function runBundlerTests(
 	});
 
 	test(`${name}: allFeatures: true`, async () => {
-		const outDir = await buildFn({
+		const outDir = await buildAndTrack({
 			pattern: "**/src/lib.rs",
 			allFeatures: true,
 		});
@@ -52,7 +69,7 @@ export function runBundlerTests(
 	});
 
 	test(`${name}: noDefaultFeatures: true`, async () => {
-		const outDir = await buildFn({
+		const outDir = await buildAndTrack({
 			pattern: "**/src/lib.rs",
 			noDefaultFeatures: true,
 		});
@@ -67,7 +84,7 @@ export function runBundlerTests(
 	});
 
 	test(`${name}: production: true`, async () => {
-		const outDir = await buildFn({
+		const outDir = await buildAndTrack({
 			pattern: "**/src/lib.rs",
 			production: true,
 		});
@@ -81,7 +98,7 @@ export function runBundlerTests(
 	});
 
 	test(`${name}: cargoBuildProfile: 'custom-profile'`, async () => {
-		const outDir = await buildFn({
+		const outDir = await buildAndTrack({
 			pattern: "**/src/lib.rs",
 			cargoBuildProfile: "custom-profile",
 		});
@@ -95,7 +112,7 @@ export function runBundlerTests(
 	});
 
 	test(`${name}: browserOnly: true`, async () => {
-		const outDir = await buildFn({
+		const outDir = await buildAndTrack({
 			pattern: "**/src/lib.rs",
 			browserOnly: true,
 		});
@@ -109,7 +126,7 @@ export function runBundlerTests(
 	});
 
 	test(`${name}: noTypescript: true`, async () => {
-		const outDir = await buildFn({
+		const outDir = await buildAndTrack({
 			pattern: "**/src/lib.rs",
 			noTypescript: true,
 		});
@@ -123,7 +140,7 @@ export function runBundlerTests(
 	});
 
 	test(`${name}: cargoBuildOverrides`, async () => {
-		const outDir = await buildFn({
+		const outDir = await buildAndTrack({
 			pattern: "**/src/lib.rs",
 			cargoBuildOverrides: (args) =>
 				args.filter((a) => a !== "--quiet").concat("--verbose"),
