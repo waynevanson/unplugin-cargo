@@ -1,20 +1,20 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expect } from "vitest";
+import { expect, test } from "vitest";
 
 const SOURCE = path.resolve(import.meta.dirname, "../../fixtures/lib");
 const ROOT = path.resolve(import.meta.dirname, "../../fixtures/fixture");
 const WORKSPACE = path.resolve(import.meta.dirname, "../../Cargo.toml");
 
 export async function createFixture(): Promise<string> {
-	const testName = expect.getState().currentTestName ?? `unknown-${Date.now()}`;
-	const hash = crypto
-		.createHash("sha256")
-		.update(testName)
-		.digest("hex")
-		.slice(0, 16);
-	const target = path.join(ROOT, hash);
+	const testName = expect.getState().currentTestName;
+
+	if (!testName) {
+		throw expect(testName).toBeTruthy();
+	}
+
+	const target = path.join(ROOT, testName);
 
 	await fs.rm(target, { recursive: true, force: true });
 	await fs.mkdir(target, { recursive: true });

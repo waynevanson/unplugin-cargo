@@ -1,0 +1,22 @@
+{
+	"$schema": "https://turbo.build/schema.json",
+	"globalDependencies": [
+		"tsconfig.json",
+		"tsup.config.ts",
+		"Cargo.toml",
+		"Cargo.lock"
+	],
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": ["dist/**"]
+		},
+		"test": {
+			"dependsOn": ["build"]
+		},
+		"prepublishOnly": {
+			"dependsOn": ["build"],
+			"outputs": ["dist/**"]
+		}
+	}
+}
