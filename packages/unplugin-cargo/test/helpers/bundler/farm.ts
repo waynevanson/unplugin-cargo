@@ -7,21 +7,23 @@ import { farmWasmPlugin } from "./farm-wasm";
 
 export async function buildWithFarm(
 	options: UnpluginCargoOptions,
+	fixture?: string,
 ): Promise<string> {
-	const fixture = await getFixture(options);
-	const outDir = path.resolve(fixture, "dists", `dist-farm-${Date.now()}`);
+	const fixtureRoot = fixture ?? (await getFixture(options));
+	const outDir = path.resolve(fixtureRoot, "dists", `dist-farm-${Date.now()}`);
 	const cargo = await importCargo("farm");
 	const resolvedConfig = await resolveConfig(
 		{
-			root: fixture,
+			root: fixtureRoot,
 			compilation: {
 				input: {
-					index: path.resolve(fixture, "index.html"),
+					index: path.resolve(fixtureRoot, "index.html"),
 				},
 				output: {
 					path: outDir,
 				},
 				presetEnv: false,
+				persistentCache: false,
 			},
 			plugins: [cargo(options)],
 			vitePlugins: [() => ({ vitePlugin: farmWasmPlugin(), filters: [".*"] })],

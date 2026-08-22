@@ -9,16 +9,21 @@ import { importCargo } from "../import-cargo";
 
 export async function buildWithRspack(
 	options: UnpluginCargoOptions,
+	fixture?: string,
 ): Promise<string> {
-	const fixture = await getFixture(options);
-	const outDir = path.resolve(fixture, "dists", `dist-rspack-${Date.now()}`);
+	const fixtureRoot = fixture ?? (await getFixture(options));
+	const outDir = path.resolve(
+		fixtureRoot,
+		"dists",
+		`dist-rspack-${Date.now()}`,
+	);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("rspack");
 	await new Promise<void>((resolve, reject) => {
 		rspack(
 			{
 				mode: "production",
-				entry: path.resolve(fixture, "src/index.js"),
+				entry: path.resolve(fixtureRoot, "src/index.js"),
 				output: {
 					path: outDir,
 					filename: "index.js",
@@ -44,7 +49,7 @@ export async function buildWithRspack(
 					cargo(options),
 					// @ts-expect-error
 					new RspackHtmlPlugin({
-						template: path.resolve(fixture, "index.html"),
+						template: path.resolve(fixtureRoot, "index.html"),
 					}),
 				],
 			},

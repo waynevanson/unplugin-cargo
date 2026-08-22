@@ -7,15 +7,20 @@ import { importCargo } from "../import-cargo";
 
 export async function buildWithWebpack(
 	options: UnpluginCargoOptions,
+	fixture?: string,
 ): Promise<string> {
-	const fixture = await getFixture(options);
-	const outDir = path.resolve(fixture, "dists", `dist-webpack-${Date.now()}`);
+	const fixtureRoot = fixture ?? (await getFixture(options));
+	const outDir = path.resolve(
+		fixtureRoot,
+		"dists",
+		`dist-webpack-${Date.now()}`,
+	);
 	const cargo = await importCargo("webpack");
 	await new Promise<void>((resolve, reject) => {
 		webpack(
 			{
 				mode: "production",
-				entry: path.resolve(fixture, "src/index.js"),
+				entry: path.resolve(fixtureRoot, "src/index.js"),
 				output: {
 					path: outDir,
 					filename: "index.js",

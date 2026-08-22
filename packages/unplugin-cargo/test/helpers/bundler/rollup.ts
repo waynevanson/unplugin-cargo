@@ -10,13 +10,18 @@ import { rollupWasmBindgen } from "../rollup-wasm-bindgen";
 
 export async function buildWithRollup(
 	options: UnpluginCargoOptions,
+	fixture?: string,
 ): Promise<string> {
-	const fixture = await getFixture(options);
-	const outDir = path.resolve(fixture, "dists", `dist-rollup-${Date.now()}`);
+	const fixtureRoot = fixture ?? (await getFixture(options));
+	const outDir = path.resolve(
+		fixtureRoot,
+		"dists",
+		`dist-rollup-${Date.now()}`,
+	);
 	await fs.mkdir(outDir, { recursive: true });
 	const cargo = await importCargo("rollup");
 	const bundle = await rollup({
-		input: path.resolve(fixture, "src/index.js"),
+		input: path.resolve(fixtureRoot, "src/index.js"),
 		plugins: [
 			// @ts-expect-error
 			cargo(options),

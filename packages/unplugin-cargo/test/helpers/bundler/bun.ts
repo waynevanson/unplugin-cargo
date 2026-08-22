@@ -13,9 +13,10 @@ const BUN_BUILD_SCRIPT = path.resolve(
 
 export async function buildWithBun(
 	options: UnpluginCargoOptions,
+	fixture?: string,
 ): Promise<string> {
-	const fixture = await getFixture(options);
-	const outDir = path.resolve(fixture, "dists", `dist-bun-${Date.now()}`);
+	const fixtureRoot = fixture ?? (await getFixture(options));
+	const outDir = path.resolve(fixtureRoot, "dists", `dist-bun-${Date.now()}`);
 	await fs.mkdir(outDir, { recursive: true });
 
 	// Serialize options for the Bun subprocess.
@@ -41,7 +42,7 @@ export async function buildWithBun(
 					...process.env,
 					CARGO_ESBUILD_PATH: path.resolve(CARGO, "esbuild.ts"),
 					OPTIONS_JSON: JSON.stringify(serialized),
-					ENTRYPOINT: path.resolve(fixture, "src/index.js"),
+					ENTRYPOINT: path.resolve(fixtureRoot, "src/index.js"),
 					OUTDIR: outDir,
 				},
 			},

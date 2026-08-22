@@ -7,12 +7,13 @@ import { importCargo } from "../import-cargo";
 
 export async function buildWithVite(
 	options: UnpluginCargoOptions,
+	fixture?: string,
 ): Promise<string> {
-	const fixture = await getFixture(options);
-	const outDir = path.resolve(fixture, "dists", `dist-vite-${Date.now()}`);
+	const fixtureRoot = fixture ?? (await getFixture(options));
+	const outDir = path.resolve(fixtureRoot, "dists", `dist-vite-${Date.now()}`);
 	const cargo = await importCargo("vite");
 	await build({
-		root: fixture,
+		root: fixtureRoot,
 		logLevel: "silent",
 		plugins: [cargo(options), wasm()],
 		build: {

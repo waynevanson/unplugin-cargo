@@ -5,8 +5,8 @@ import picomatch from "picomatch";
 import pino from "pino";
 import type { UnpluginOptions } from "unplugin";
 import { cargoBuild } from "./cargo-build";
-import { findLibraryDependencies } from "./find-library-dependencies";
 import { findProjectFilePath } from "./find-project-file-path";
+import { findProjectWatchFiles } from "./find-project-watch-files";
 import { HashSet } from "./hash-set";
 import { findLibraryMetadata, findProjectMetadata } from "./metadata";
 import { parsePluginOptions, type UnpluginCargoOptions } from "./options";
@@ -105,10 +105,6 @@ export function unpluginFactory(
 			return path.resolve(createLibraryDir(hash), source);
 		},
 		watchChange(id, change) {
-			// todo: instead of watching just dependencies,
-			// we need to watch all files and trigger rebuild when the dependencies change.
-			// todo: how to find watch files related to the project like build script .rs?
-			// build.rs is technically the src_path
 			log.debug({ id, change }, "watchChange");
 		},
 		async transform(_code, libraryFilePath) {
@@ -160,15 +156,16 @@ export function unpluginFactory(
 
 			const libraryDepsDir = path.resolve(libraryBuildDir, "deps");
 
-			const libraryFileDependencies = await findLibraryDependencies({
+			const projectWatchFiles = await findProjectWatchFiles({
 				projectRoot: path.dirname(projectFilePath),
+				projectFilePath,
 				libraryDepsDir,
 				libraryTargetName,
 			});
 
-			for (const libraryDependency of libraryFileDependencies) {
+			for (const watchFile of projectWatchFiles) {
 				if (typeof this.addWatchFile === "function") {
-					this.addWatchFile(libraryDependency);
+					this.addWatchFile(watchFile);
 				}
 			}
 

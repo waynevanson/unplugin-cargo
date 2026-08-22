@@ -6,7 +6,7 @@ A universal plugin that seamlessly integrates Rust crates into your frontend pro
 
 - **Zero-Config Compiling**: Automatically detects the closest `Cargo.toml`.
 - **Universal**: Works across Vite, Rollup, Webpack, esbuild, and Rspack.
-- **Watch mode**: Watches dependencies related to the entrypoint (where the bundler supports it).
+- **Watch mode**: Watches `Cargo.toml`, `Cargo.lock`, `build.rs`, and every `.rs` file in the project so edits trigger a rebuild (where the bundler supports it).
 - **WASM-Bindgen Integration**: Generates the necessary JS glue code automatically.
 - **TypeScript Support**: Automatically generates and syncs `.d.ts` files for your Rust exports.
 - **HMR Support**: Works with Vite's dev server.
