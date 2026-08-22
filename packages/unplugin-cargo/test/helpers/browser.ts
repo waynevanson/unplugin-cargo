@@ -1,10 +1,23 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { type Browser, chromium } from "@playwright/test";
+
+const WS_ENDPOINT_FILE = path.join(
+	os.tmpdir(),
+	"unplugin-cargo-playwright-ws-endpoint",
+);
 
 let browser: Browser | undefined;
 
+async function connectSharedBrowser(): Promise<Browser> {
+	const wsEndpoint = await fs.promises.readFile(WS_ENDPOINT_FILE, "utf8");
+	return chromium.connect(wsEndpoint);
+}
+
 export async function getBrowser(): Promise<Browser> {
 	if (!browser) {
-		browser = await chromium.launch();
+		browser = await connectSharedBrowser();
 	}
 	return browser;
 }
@@ -24,12 +37,5 @@ export async function runInBrowser(url: string): Promise<{
 		return JSON.parse(raw);
 	} finally {
 		await page.close();
-	}
-}
-
-export async function closeBrowser(): Promise<void> {
-	if (browser) {
-		await browser.close();
-		browser = undefined;
 	}
 }
