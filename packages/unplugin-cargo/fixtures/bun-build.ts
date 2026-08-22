@@ -78,7 +78,11 @@ function bunWasmPlugin() {
 				const exportLines = exports
 					.map(
 						(exp) =>
-							"export const " + exp.name + " = instance.exports." + exp.name + ";",
+							"export const " +
+							exp.name +
+							" = instance.exports." +
+							exp.name +
+							";",
 					)
 					.join("\n");
 
