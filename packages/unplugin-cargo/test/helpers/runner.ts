@@ -261,6 +261,28 @@ describe("unplugin-cargo internals", () => {
 				`Expected exactly 1 target to match the src_path of "${notCdylibLibraryFilePath}" and be a "cdylib" target`,
 			);
 		});
+
+		test("throws for a workspace without a matching package", async () => {
+			const workspaceOnlyLibraryFilePath = path.resolve(
+				FIXTURES,
+				"workspace-only/src/lib.rs",
+			);
+			const workspaceOnlyProjectFilePath = path.resolve(
+				FIXTURES,
+				"workspace-only/Cargo.toml",
+			);
+			const plugin = unpluginFactory({ pattern: "**/src/lib.rs" });
+
+			await expect(
+				plugin.transform.call(
+					{ addWatchFile: () => {} },
+					"",
+					workspaceOnlyLibraryFilePath,
+				),
+			).rejects.toThrow(
+				`Expected exactly 1 package to have the manifest_path of "${workspaceOnlyProjectFilePath}"`,
+			);
+		});
 	});
 
 	describe("watchChange", () => {
