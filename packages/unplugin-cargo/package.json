@@ -4,6 +4,7 @@
 	"description": "Import wasm-bindgen compatible Rust to JavaScript via unplugin",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
+	"private": false,
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
