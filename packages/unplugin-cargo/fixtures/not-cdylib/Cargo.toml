@@ -1,0 +1,15 @@
+[package]
+name = "not-cdylib"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "not_cdylib"
+crate-type = ["rlib"]
+
+[dependencies]
+wasm-bindgen = "=0.2.121"
+
+[workspace]
+members = ["."]
+resolver = "3"

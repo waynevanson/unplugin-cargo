@@ -68,7 +68,7 @@ function matchesPattern(id: string, pattern: Pattern): boolean {
 	return included && !excluded;
 }
 
-function resolveProduction(options: { production?: boolean }): boolean {
+export function resolveProduction(options: { production?: boolean }): boolean {
 	if (options.production !== undefined) return options.production;
 	return process.env.NODE_ENV === "production";
 }

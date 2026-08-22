@@ -44,7 +44,7 @@ export function findLibraryMetadata(options: {
 	}
 
 	const target = findOnlyOne(
-		package_?.targets ?? [],
+		package_.targets,
 		(target) =>
 			target.src_path === options.libraryFilePath &&
 			target.crate_types.includes("cdylib"),

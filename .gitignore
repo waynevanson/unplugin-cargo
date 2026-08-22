@@ -6,3 +6,4 @@ node_modules
 /packages/*/coverage
 /packages/*/fixtures/lib/dists
 /packages/*/fixtures/.fixtures
+/packages/*/fixtures/*/target

@@ -56,7 +56,7 @@
 	],
 	"scripts": {
 		"build": "tsup",
-		"test": "vitest run",
+		"test": "vitest run --coverage",
 		"prepublishOnly": "tsup"
 	},
 	"author": "Wayne Van Son",

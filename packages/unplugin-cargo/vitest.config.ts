@@ -5,5 +5,8 @@ export default defineConfig({
 		// todo: deleta all but this line
 		globalSetup: ["./test/globalSetup.ts"],
 		testTimeout: 120_000,
+		coverage: {
+			exclude: ["test/**"],
+		},
 	},
 });
