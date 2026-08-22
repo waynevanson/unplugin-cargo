@@ -1,7 +1,7 @@
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { unpluginFactory } from "../../src/core";
 import type { UnpluginCargoOptions } from "../../src/index";
+import { unpluginFactory } from "../../src/internal/core";
 import { runInBrowser } from "./browser";
 import { cleanupFixture, getFixture } from "./fixture";
 import { startServer } from "./server";
