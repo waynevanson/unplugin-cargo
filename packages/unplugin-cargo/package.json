@@ -13,6 +13,10 @@
 			"types": "./dist/vite.d.ts",
 			"default": "./dist/vite.js"
 		},
+		"./farm": {
+			"types": "./dist/farm.d.ts",
+			"default": "./dist/farm.js"
+		},
 		"./rollup": {
 			"types": "./dist/rollup.d.ts",
 			"default": "./dist/rollup.js"
