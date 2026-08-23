@@ -124,10 +124,11 @@ export type UnpluginCargoOptions = {
 	/**
 	 * @summary
 	 * Pattern of files that could be used as entrypoints.
-	 * Needs to start with `**` so that it matches full paths.
+	 * Matched against paths relative to each crate's root
+	 * (the directory containing `Cargo.toml`).
 	 *
 	 * @example
-	 * `**\/*.rs`
+	 * `src/lib.rs`
 	 */
 	pattern:
 		| string

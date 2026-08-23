@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import type { UnpluginCargoOptions } from "../../src/index";
-import { unpluginFactory } from "../../src/internal/core";
+import { matchesPattern, unpluginFactory } from "../../src/internal/core";
 import { runInBrowser } from "./browser";
 import { cleanupFixture, createFixture, getFixture } from "./fixture";
 import { startServer } from "./server";
@@ -331,29 +331,23 @@ describe("unplugin-cargo internals", () => {
 	});
 
 	describe("pattern matching", () => {
-		test("returns null for non-matching ids", async () => {
+		test("returns false for non-matching relative ids", () => {
 			const contexts = [
-				{ pattern: "**/src/lib.rs", id: "/foo/other.rs" },
-				{ pattern: /\/src\/lib\.rs$/, id: "/foo/other.rs" },
-				{ pattern: ["**/src/lib.rs", "**/main.rs"], id: "/foo/other.rs" },
+				{ pattern: "src/lib.rs", id: "src/other.rs" },
+				{ pattern: /src\/lib\.rs$/, id: "src/other.rs" },
+				{ pattern: ["src/lib.rs", "main.rs"], id: "src/other.rs" },
 				{
 					pattern: { include: "**/*.rs", exclude: "**/node_modules/**" },
-					id: "/project/node_modules/foo.rs",
+					id: "node_modules/foo.rs",
 				},
 				{
-					pattern: { include: ["**/src/lib.rs", "**/main.rs"] },
-					id: "/foo/other.rs",
+					pattern: { include: ["src/lib.rs", "main.rs"] },
+					id: "src/other.rs",
 				},
 			];
 
 			for (const { pattern, id } of contexts) {
-				const plugin = unpluginFactory({ pattern });
-				const result = await plugin.transform.call(
-					{ addWatchFile: () => {} },
-					"",
-					id,
-				);
-				expect(result).toBeNull();
+				expect(matchesPattern(id, pattern)).toBe(false);
 			}
 		});
 	});

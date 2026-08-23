@@ -4,7 +4,6 @@ A universal plugin that seamlessly integrates Rust crates into your frontend pro
 
 ## Features
 
-- **Zero-Config Compiling**: Automatically detects the closest `Cargo.toml`.
 - **Universal**: Works across Vite, Rollup, Webpack, esbuild, and Rspack.
 - **Watch mode**: Watches `Cargo.toml`, `Cargo.lock`, `build.rs`, and every `.rs` file in the project so edits trigger a rebuild (where the bundler supports it).
 - **WASM-Bindgen Integration**: Generates the necessary JS glue code automatically.
@@ -30,7 +29,7 @@ npm install @waynevanson/unplugin-cargo --save-dev
 
 ### 1. Configure your bundler
 
-Import the plugin from the subpath for your bundler and specify which files should be treated as Rust entrypoints using a glob pattern.
+Import the plugin from the subpath for your bundler and specify which files should be treated as Rust entrypoints using a glob pattern. Patterns are matched against paths relative to each crate's root (the directory containing `Cargo.toml`).
 
 #### Vite
 
@@ -42,7 +41,7 @@ export default defineConfig({
   plugins: [
     cargo({
       // Files to treat as Cargo entrypoints
-      pattern: "**/src/lib.rs",
+      pattern: "src/lib.rs",
     }),
   ],
 });
@@ -56,7 +55,7 @@ import { cargo } from "@waynevanson/unplugin-cargo/rollup";
 export default {
   plugins: [
     cargo({
-      pattern: "**/src/lib.rs",
+      pattern: "src/lib.rs",
     }),
   ],
 };
@@ -70,7 +69,7 @@ const { cargo } = require("@waynevanson/unplugin-cargo/webpack");
 module.exports = {
   plugins: [
     cargo({
-      pattern: "**/src/lib.rs",
+      pattern: "src/lib.rs",
     }),
   ],
 };
@@ -85,7 +84,7 @@ import { build } from "esbuild";
 build({
   plugins: [
     cargo({
-      pattern: "**/src/lib.rs",
+      pattern: "src/lib.rs",
     }),
   ],
 });
@@ -99,7 +98,7 @@ const { cargo } = require("@waynevanson/unplugin-cargo/rspack");
 module.exports = {
   plugins: [
     cargo({
-      pattern: "**/src/lib.rs",
+      pattern: "src/lib.rs",
     }),
   ],
 };
@@ -149,7 +148,7 @@ console.log(greet("Vite"));
 
 | Option                | Type                                                                                         | Description                                                                                  |
 | :-------------------- | :------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------- |
-| `pattern`             | `string \| RegExp \| Array<string \| RegExp> \| { include?, exclude? }`                       | Pattern of files to treat as Cargo entrypoints. Strings are interpreted as glob patterns.    |
+| `pattern`             | `string \| RegExp \| Array<string \| RegExp> \| { include?, exclude? }`                       | Pattern of files to treat as Cargo entrypoints. Strings are interpreted as glob patterns matched relative to each crate's root (the directory containing `Cargo.toml`). |
 | `production`          | `boolean`                                                                                    | Explicitly set production mode. Defaults to `process.env.NODE_ENV === "production"`.         |
 | `browserOnly`         | `boolean`                                                                                    | (Optional) Passes `--browser` to `wasm-bindgen`.                                             |
 | `noTypescript`        | `boolean`                                                                                    | (Optional) Disables `.d.ts` generation.                                                      |

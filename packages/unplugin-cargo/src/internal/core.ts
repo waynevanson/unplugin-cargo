@@ -49,7 +49,7 @@ function matchesSinglePattern(id: string, pattern: string | RegExp): boolean {
 	return pattern.test(id);
 }
 
-function matchesPattern(id: string, pattern: Pattern): boolean {
+export function matchesPattern(id: string, pattern: Pattern): boolean {
 	if (typeof pattern === "string" || pattern instanceof RegExp) {
 		return matchesSinglePattern(id, pattern);
 	}
@@ -108,18 +108,30 @@ export function unpluginFactory(
 			log.debug({ id, change }, "watchChange");
 		},
 		async transform(_code, libraryFilePath) {
-			if (!matchesPattern(libraryFilePath, context.pattern)) {
+			if (path.extname(libraryFilePath) !== ".rs") {
 				return null;
 			}
 
-			const production = resolveProduction(context);
-			const cargoBuildProfile = context.cargoBuildProfile({ production });
-
 			const projectFilePath = findProjectFilePath(libraryFilePath, log);
+
+			if (projectFilePath === undefined) {
+				return null;
+			}
+
+			const relativeLibraryFilePath = path
+				.relative(path.dirname(projectFilePath), libraryFilePath)
+				.replace(/\\/g, "/");
+
+			if (!matchesPattern(relativeLibraryFilePath, context.pattern)) {
+				return null;
+			}
 
 			if (typeof this.addWatchFile === "function") {
 				this.addWatchFile(projectFilePath);
 			}
+
+			const production = resolveProduction(context);
+			const cargoBuildProfile = context.cargoBuildProfile({ production });
 			const projectMetadata = findProjectMetadata(projectFilePath, log);
 
 			const libraryMetadata = findLibraryMetadata({

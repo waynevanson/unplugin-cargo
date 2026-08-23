@@ -1,19 +1,26 @@
-import { execFileSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import type pino from "pino";
 
-export function findProjectFilePath(id: string, log: pino.Logger) {
-	const args = ["locate-project", "--message-format=plain"];
+export function findProjectFilePath(
+	id: string,
+	log: pino.Logger,
+): string | undefined {
+	let dir = path.dirname(id);
+	const root = path.parse(dir).root;
 
-	log.debug(args, "cargo-locate-project");
+	while (dir !== root) {
+		const candidate = path.join(dir, "Cargo.toml");
 
-	const project = execFileSync("cargo", args, {
-		stdio: ["ignore", "pipe", "ignore"],
-		encoding: "utf-8",
-		cwd: path.dirname(id),
-	}).trim();
+		if (fs.existsSync(candidate)) {
+			log.debug({ project: candidate }, "cargo-project");
+			return candidate;
+		}
 
-	log.debug({ project }, "cargo-project");
+		const parent = path.dirname(dir);
+		if (parent === dir) break;
+		dir = parent;
+	}
 
-	return project;
+	return undefined;
 }

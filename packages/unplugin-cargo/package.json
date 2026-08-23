@@ -37,7 +37,8 @@
 	},
 	"type": "module",
 	"repository": {
-		"url": "https://github.com/waynevanson/unplugin-cargo"
+		"url": "https://github.com/waynevanson/unplugin-cargo",
+		"directory": "packages/unplugin-cargo"
 	},
 	"publishConfig": {
 		"access": "public",
