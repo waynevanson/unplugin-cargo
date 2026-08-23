@@ -1,5 +1,6 @@
 import type { LevelWithSilent } from "pino";
 import * as v from "valibot";
+import type { Pattern } from "./pattern";
 
 const logLevel = v.picklist([
 	"silent",
@@ -105,7 +106,7 @@ export type UnpluginCargoOptionsInternal = {
 	production: boolean | undefined;
 	typescript: boolean;
 	browserless: boolean;
-	pattern: UnpluginCargoOptions["pattern"];
+	pattern: Pattern;
 	cargoBuildOverrides: CargoBuildOverrides;
 	logLevel: LevelWithSilent;
 	cargoBuildProfile: (context: { production: boolean }) => string;
@@ -130,14 +131,7 @@ export type UnpluginCargoOptions = {
 	 * @example
 	 * `src/lib.rs`
 	 */
-	pattern:
-		| string
-		| RegExp
-		| Array<string | RegExp>
-		| {
-				include?: string | RegExp | Array<string | RegExp>;
-				exclude?: string | RegExp | Array<string | RegExp>;
-		  };
+	pattern: Pattern;
 
 	/**
 	 * @summary

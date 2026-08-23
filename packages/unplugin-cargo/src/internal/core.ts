@@ -1,7 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { copyFile, readFile } from "node:fs/promises";
 import path from "node:path";
-import picomatch from "picomatch";
 import pino from "pino";
 import type { UnpluginOptions } from "unplugin";
 import { cargoBuild } from "./cargo-build";
@@ -9,6 +8,7 @@ import { findProjectFilePath } from "./find-project-file-path";
 import { findProjectWatchFiles } from "./find-project-watch-files";
 import { HashSet } from "./hash-set";
 import { findLibraryMetadata, findProjectMetadata } from "./metadata";
+import { matchesPattern } from "./pattern";
 import { parsePluginOptions, type UnpluginCargoOptions } from "./options";
 import { createLibraryDir, isString } from "./utils";
 
@@ -24,48 +24,6 @@ interface LibraryHashable {
 		features?: Array<string>;
 		noDefaultFeatures: boolean;
 	};
-}
-
-type Pattern =
-	| string
-	| RegExp
-	| Array<string | RegExp>
-	| {
-			include?: string | RegExp | Array<string | RegExp>;
-			exclude?: string | RegExp | Array<string | RegExp>;
-	  };
-
-function normalizePatterns(
-	patterns: string | RegExp | Array<string | RegExp> | undefined,
-): Array<string | RegExp> {
-	if (patterns === undefined) return [];
-	return Array.isArray(patterns) ? patterns : [patterns];
-}
-
-function matchesSinglePattern(id: string, pattern: string | RegExp): boolean {
-	if (typeof pattern === "string") {
-		return picomatch.isMatch(id, pattern, { dot: true });
-	}
-	return pattern.test(id);
-}
-
-export function matchesPattern(id: string, pattern: Pattern): boolean {
-	if (typeof pattern === "string" || pattern instanceof RegExp) {
-		return matchesSinglePattern(id, pattern);
-	}
-
-	if (Array.isArray(pattern)) {
-		return pattern.some((p) => matchesSinglePattern(id, p));
-	}
-
-	const include = normalizePatterns(pattern.include);
-	const exclude = normalizePatterns(pattern.exclude);
-
-	const included =
-		include.length === 0 || include.some((p) => matchesSinglePattern(id, p));
-	const excluded = exclude.some((p) => matchesSinglePattern(id, p));
-
-	return included && !excluded;
 }
 
 export function resolveProduction(options: { production?: boolean }): boolean {
