@@ -8,5 +8,12 @@ export default defineConfig({
 		coverage: {
 			exclude: ["test/**"],
 		},
+		reporters: [
+			"default",
+			[
+				"./test/reporter.ts",
+				{ outputFile: "./test-durations.jsonl", strictNames: true },
+			],
+		],
 	},
 });
