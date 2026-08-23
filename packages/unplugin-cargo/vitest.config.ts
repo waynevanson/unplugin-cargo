@@ -12,7 +12,12 @@ export default defineConfig({
 			"default",
 			[
 				"./test/reporter.ts",
-				{ outputFile: "./test-durations.jsonl", strictNames: true },
+				{
+					outputFile: "./test-durations.jsonl",
+					historyFile: "./test-durations.history.jsonl",
+					strictNames: true,
+					showDiff: true,
+				},
 			],
 		],
 	},
