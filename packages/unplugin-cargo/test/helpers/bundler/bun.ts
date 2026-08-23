@@ -1,9 +1,12 @@
 import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
+import { promisify } from "node:util";
 import path from "node:path";
 import type { UnpluginCargoOptions } from "../../../src/index";
 import { createHtml } from "../create-html";
 import { getFixture } from "../fixture";
+
+const execFileAsync = promisify(execFile);
 
 const CARGO = path.resolve(import.meta.dirname, "../../../src");
 const BUN_BUILD_SCRIPT = path.resolve(
@@ -33,26 +36,14 @@ export async function buildWithBun(
 	const scriptPath = path.resolve(outDir, "_bun-build.ts");
 	await fs.copyFile(BUN_BUILD_SCRIPT, scriptPath);
 
-	await new Promise<void>((resolve, reject) => {
-		execFile(
-			"bun",
-			["run", scriptPath],
-			{
-				env: {
-					...process.env,
-					CARGO_ESBUILD_PATH: path.resolve(CARGO, "esbuild.ts"),
-					OPTIONS_JSON: JSON.stringify(serialized),
-					ENTRYPOINT: path.resolve(fixtureRoot, "src/index.js"),
-					OUTDIR: outDir,
-				},
-			},
-			(err, stdout, stderr) => {
-				if (err) {
-					return reject(new Error(stderr || stdout || err.message));
-				}
-				resolve();
-			},
-		);
+	await execFileAsync("bun", ["run", scriptPath], {
+		env: {
+			...process.env,
+			CARGO_ESBUILD_PATH: path.resolve(CARGO, "esbuild.ts"),
+			OPTIONS_JSON: JSON.stringify(serialized),
+			ENTRYPOINT: path.resolve(fixtureRoot, "src/index.js"),
+			OUTDIR: outDir,
+		},
 	});
 
 	await fs.unlink(scriptPath);

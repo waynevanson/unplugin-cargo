@@ -1,9 +1,12 @@
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import type pino from "pino";
 import * as v from "valibot";
 import { findOnlyOne } from "./utils";
 
-export function findProjectMetadata(projectFilename: string, log: pino.Logger) {
+const execFileAsync = promisify(execFile);
+
+export async function findProjectMetadata(projectFilename: string, log: pino.Logger) {
 	const args = [
 		"metadata",
 		"--no-deps",
@@ -13,11 +16,11 @@ export function findProjectMetadata(projectFilename: string, log: pino.Logger) {
 
 	log.debug({ args }, "cargo-metadata");
 
-	const metacontent = execFileSync("cargo", args, {
+	const { stdout: metacontent } = await execFileAsync("cargo", args, {
 		encoding: "utf-8",
-	}).trim();
+	});
 
-	const json = JSON.parse(metacontent);
+	const json = JSON.parse(metacontent.trim());
 	log.debug({ json }, "metadata-raw");
 
 	const parsed = v.parse(MetadataSchema, json);

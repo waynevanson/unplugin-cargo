@@ -1,5 +1,6 @@
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import { copyFile, readFile } from "node:fs/promises";
+import { promisify } from "node:util";
 import path from "node:path";
 import pino from "pino";
 import type { UnpluginOptions } from "unplugin";
@@ -11,6 +12,8 @@ import { findLibraryMetadata, findProjectMetadata } from "./metadata";
 import { matchesPattern } from "./pattern";
 import { parsePluginOptions, type UnpluginCargoOptions } from "./options";
 import { createLibraryDir, isString } from "./utils";
+
+const execFileAsync = promisify(execFile);
 
 interface LibraryHashable {
 	projectFilePath: string;
@@ -90,7 +93,7 @@ export function unpluginFactory(
 
 			const production = resolveProduction(context);
 			const cargoBuildProfile = context.cargoBuildProfile({ production });
-			const projectMetadata = findProjectMetadata(projectFilePath, log);
+			const projectMetadata = await findProjectMetadata(projectFilePath, log);
 
 			const libraryMetadata = findLibraryMetadata({
 				projectMetadata,
@@ -110,7 +113,7 @@ export function unpluginFactory(
 				cargoProfileDir,
 			);
 
-			cargoBuild({
+			await cargoBuild({
 				log,
 				cargoBuildTarget,
 				cargoBuildOverrides,
@@ -151,7 +154,7 @@ export function unpluginFactory(
 
 			const wasmBindgenOutDir = createLibraryDir(hash);
 
-			buildWasmBindgen({
+			await buildWasmBindgen({
 				browserless,
 				log,
 				typescript,
@@ -224,7 +227,7 @@ async function copyTypescriptDeclaration(library: {
 //
 // `.js` and `.wasm` files are created in outDir,
 // and added to dependency graph from imports in the `.js` entrypoint.
-export function buildWasmBindgen(input: {
+export async function buildWasmBindgen(input: {
 	typescript: boolean;
 	browserless: boolean;
 	wasmBindgenOutDir: string;
@@ -240,8 +243,7 @@ export function buildWasmBindgen(input: {
 
 	input.log.debug({ args }, "wasm-bindgen");
 
-	execFileSync("wasm-bindgen", args, {
+	await execFileAsync("wasm-bindgen", args, {
 		encoding: "utf-8",
-		stdio: ["ignore", "pipe", "pipe"],
 	});
 }

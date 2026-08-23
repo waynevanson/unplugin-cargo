@@ -1,9 +1,12 @@
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import type pino from "pino";
 import type { CargoBuildOverrides } from "./options";
 import { isString } from "./utils";
 
-export function cargoBuild(context: {
+const execFileAsync = promisify(execFile);
+
+export async function cargoBuild(context: {
 	cargoBuildOverrides: CargoBuildOverrides;
 	projectFilePath: string;
 	log: pino.Logger;
@@ -46,8 +49,7 @@ export function cargoBuild(context: {
 		context.log.debug("cargo-build:no-overriden-args");
 	}
 
-	execFileSync("cargo", args, {
+	await execFileAsync("cargo", args, {
 		encoding: "utf-8",
-		stdio: ["ignore", "pipe", "pipe"],
 	});
 }
