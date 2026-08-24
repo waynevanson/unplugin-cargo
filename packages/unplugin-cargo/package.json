@@ -1,6 +1,6 @@
 {
 	"name": "@waynevanson/unplugin-cargo",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Import wasm-bindgen compatible Rust to JavaScript via unplugin",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",

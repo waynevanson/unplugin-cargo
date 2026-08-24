@@ -1,6 +1,4 @@
 {
-	"name": "unplugin-cargo-monorepo",
-	"version": "4.1.0",
 	"private": true,
 	"type": "module",
 	"scripts": {
