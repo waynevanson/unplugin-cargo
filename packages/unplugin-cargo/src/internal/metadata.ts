@@ -73,6 +73,7 @@ export function findLibraryMetadata(options: {
 // There's more data but we're only going to validate what we need
 export const MetadataSchema = v.object({
 	target_directory: v.string(),
+	workspace_root: v.string(),
 	packages: v.array(
 		v.object({
 			name: v.string(),

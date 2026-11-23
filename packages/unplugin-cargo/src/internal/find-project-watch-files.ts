@@ -4,6 +4,7 @@ import { findLibraryDependencies } from "./find-library-dependencies";
 
 interface Options {
 	projectRoot: string;
+	workspaceRoot: string;
 	projectFilePath: string;
 	libraryDepsDir: string;
 	libraryTargetName: string;
@@ -14,9 +15,13 @@ export async function findProjectWatchFiles(
 ): Promise<Set<string>> {
 	const watched = new Set<string>();
 
-	// Manifest files
+	// Manifest files. In a Cargo workspace the lock file lives at the
+	// workspace root, not next to the member manifest.
 	watched.add(options.projectFilePath);
-	watched.add(path.resolve(options.projectRoot, "Cargo.lock"));
+	const lockFile = path.resolve(options.workspaceRoot, "Cargo.lock");
+	if (await fileExists(lockFile)) {
+		watched.add(lockFile);
+	}
 
 	// Build script (default location and any .rs at project root that looks like a build script)
 	const buildRs = path.resolve(options.projectRoot, "build.rs");
@@ -29,15 +34,18 @@ export async function findProjectWatchFiles(
 		watched.add(file);
 	}
 
-	// Dependency graph emitted by rustc for the library target
+	// Dependency graph emitted by rustc for the library target. The `.d` file
+	// paths are relative to the workspace root.
 	const libraryDeps = await findLibraryDependencies({
-		projectRoot: options.projectRoot,
+		workspaceRoot: options.workspaceRoot,
 		libraryDepsDir: options.libraryDepsDir,
 		libraryTargetName: options.libraryTargetName,
 	});
 
 	for (const dep of libraryDeps) {
-		watched.add(dep);
+		if (await fileExists(dep)) {
+			watched.add(dep);
+		}
 	}
 
 	return watched;

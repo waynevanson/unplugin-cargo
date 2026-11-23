@@ -131,6 +131,7 @@ export function unpluginFactory(
 
 			const projectWatchFiles = await findProjectWatchFiles({
 				projectRoot: path.dirname(projectFilePath),
+				workspaceRoot: projectMetadata.workspace_root,
 				projectFilePath,
 				libraryDepsDir,
 				libraryTargetName,

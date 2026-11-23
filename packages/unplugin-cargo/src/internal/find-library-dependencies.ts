@@ -4,7 +4,7 @@ import path from "node:path";
 // todo: instead of watching just dependencies,
 // we need to watch all files and trigger rebuild when the dependencies change.
 export async function findLibraryDependencies(options: {
-	projectRoot: string;
+	workspaceRoot: string;
 	libraryDepsDir: string;
 	libraryTargetName: string;
 }) {
@@ -17,7 +17,10 @@ export async function findLibraryDependencies(options: {
 		encoding: "utf8",
 	});
 
-	const graph = createGraphFromDependencies(dependencies, options.projectRoot);
+	const graph = createGraphFromDependencies(
+		dependencies,
+		options.workspaceRoot,
+	);
 
 	const neighboursEntry = path.resolve(
 		options.libraryDepsDir,
@@ -35,10 +38,7 @@ function splitTargets(targets: string): Array<string> {
 		.map((target) => target.replace(/\\ /g, " "));
 }
 
-export function createGraphFromDependencies(
-	contents: string,
-	projectRoot: string,
-) {
+export function createGraphFromDependencies(contents: string, baseDir: string) {
 	return new Map(
 		contents
 			.split("\n")
@@ -53,10 +53,10 @@ export function createGraphFromDependencies(
 				const targets = line.slice(separator + 2);
 
 				return [
-					path.resolve(projectRoot, source),
+					path.resolve(baseDir, source),
 					new Set(
 						splitTargets(targets).map((target) =>
-							path.resolve(projectRoot, target),
+							path.resolve(baseDir, target),
 						),
 					),
 				] as const;
