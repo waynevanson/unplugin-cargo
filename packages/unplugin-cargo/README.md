@@ -31,10 +31,10 @@ npm install @waynevanson/unplugin-cargo --save-dev
 The built `dist` output is committed, so the package can be installed directly from the repository without a build step. This repository is a monorepo, so point the package manager at the package directory:
 
 ```bash
-pnpm add --save-dev "github:waynevanson/unplugin-cargo#path:/packages/unplugin-cargo"
+pnpm add --save-dev "github:waynevanson/unplugin-cargo#path:/packages/unplugin-cargo&0.2.0"
 ```
 
-> npm's git protocol does not support subdirectories, so use pnpm for a direct GitHub install.
+> npm's [git URL specifier](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies) only accepts a `<commit-ish>` or `semver:<range>` after `#`, and its `<path>` segment refers to the repository path on the host, not a directory inside the repo. `#path:` is a pnpm extension, so use pnpm for a direct GitHub install. The `&0.2.0` fragment pins the install to the `0.2.0` tag; replace it with another tag or commit to install a different version.
 
 ## Usage
 
