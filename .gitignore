@@ -3,6 +3,8 @@ node_modules
 .turbo
 /target
 /packages/*/dist
+# Ship the built package with the repo so it can be installed from GitHub.
+!/packages/unplugin-cargo/dist
 /packages/*/coverage
 /packages/*/test-durations.jsonl
 /packages/*/fixtures/lib/dists

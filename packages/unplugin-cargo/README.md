@@ -26,6 +26,16 @@ You must have the following installed on your system:
 npm install @waynevanson/unplugin-cargo --save-dev
 ```
 
+### From GitHub
+
+The built `dist` output is committed, so the package can be installed directly from the repository without a build step. This repository is a monorepo, so point the package manager at the package directory:
+
+```bash
+pnpm add --save-dev "github:waynevanson/unplugin-cargo#path:/packages/unplugin-cargo"
+```
+
+> npm's git protocol does not support subdirectories, so use pnpm for a direct GitHub install.
+
 ## Usage
 
 ### 1. Configure your bundler
