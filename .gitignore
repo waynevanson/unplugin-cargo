@@ -10,3 +10,4 @@ node_modules
 /packages/*/fixtures/lib/dists
 /packages/*/fixtures/.fixtures
 /packages/*/fixtures/*/target
+*.tgz

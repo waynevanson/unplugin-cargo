@@ -22,27 +22,24 @@ You must have the following installed on your system:
 
 ## Installation
 
-This package is published to [GitHub Packages](https://github.com/waynevanson/unplugin-cargo/pkgs/npm/unplugin-cargo), not to npm. GitHub Packages requires authentication even for public packages, so add the registry and a token with `read:packages` to your `.npmrc`:
-
-```ini
-@waynevanson:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
-```
+This package is not published to npm. Every release attaches a prebuilt tarball to the [GitHub Releases](https://github.com/waynevanson/unplugin-cargo/releases) page, which any package manager can install straight from its URL — no registry, no token, and no build step:
 
 ```bash
-# NODE_AUTH_TOKEN should be a GitHub token with read:packages
-npm install @waynevanson/unplugin-cargo --save-dev
+# npm, pnpm, yarn, bun all accept a tarball URL
+pnpm add --save-dev https://github.com/waynevanson/unplugin-cargo/releases/download/0.2.1/waynevanson-unplugin-cargo-0.2.1.tgz
 ```
 
-### From GitHub
+The version appears twice in that URL, in the tag and in the filename. Swap both occurrences to move to another release; your lockfile pins the tarball's `resolved` URL and `integrity` hash, so upgrades are explicit. Use the tag exactly as it was pushed — a `v`-prefixed tag needs the `v` in the URL's tag segment, though never in the filename.
 
-The built `dist` output is committed, so the package can be installed directly from the repository without a build step. This repository is a monorepo, so point the package manager at the package directory:
+### From the repository
+
+The built `dist` output is committed as well, so the package can also be installed from a git ref without a build step. This repository is a monorepo, so point the package manager at the package directory:
 
 ```bash
 pnpm add --save-dev "github:waynevanson/unplugin-cargo#path:/packages/unplugin-cargo&0.2.0"
 ```
 
-> npm's [git URL specifier](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies) only accepts a `<commit-ish>` or `semver:<range>` after `#`, and its `<path>` segment refers to the repository path on the host, not a directory inside the repo. `#path:` is a pnpm extension, so use pnpm for a direct GitHub install. The `&0.2.0` fragment pins the install to the `0.2.0` tag; replace it with another tag or commit to install a different version.
+> npm's [git URL specifier](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies) only accepts a `<commit-ish>` or `semver:<range>` after `#`, and its `<path>` segment refers to the repository path on the host, not a directory inside the repo. `#path:` is a pnpm extension, so use pnpm for a direct GitHub install, or prefer the tarball URL above. The `&0.2.0` fragment pins the install to the `0.2.0` tag; replace it with another tag or commit to install a different version. Unlike the tarball, this route requires `git` at install time.
 
 ## Usage
 
@@ -213,12 +210,12 @@ Transformation pipeline:
 
 ## Releasing
 
-Publishing happens only in CI, through `.github/workflows/publish.yml`, to GitHub Packages. Bump `packages/unplugin-cargo/package.json` and push a matching tag (with or without a `v` prefix) — the workflow refuses to publish when the tag and the package version disagree:
+Releases are cut only in CI, through `.github/workflows/release.yml`, which builds the package, runs `pnpm pack`, and attaches the tarball to a GitHub Release. Bump `packages/unplugin-cargo/package.json` and push a matching tag (with or without a `v` prefix) — the workflow refuses to release when the tag and the package version disagree:
 
 ```bash
-git tag 0.3.0 && git push origin 0.3.0
+git tag 0.2.1 && git push origin 0.2.1
 ```
 
-You can also publish an untagged commit by running the `publish` workflow manually from the Actions tab (`workflow_dispatch`) and picking a branch, tag, or commit SHA. The tag check only applies when HEAD is tagged, so bump the version before re-dispatching.
+You can also release an untagged commit by running the `release` workflow manually from the Actions tab (`workflow_dispatch`) and picking a branch, tag, or commit SHA; in that case the tag is created from the package version. The tag check only applies when HEAD is tagged, so bump the version before re-dispatching.
 
-The workflow installs from the lockfile, builds with `tsup`, and runs `pnpm publish`. It authenticates with the workflow's `GITHUB_TOKEN`, so no secrets need to be configured. Published versions are immutable; bump the version instead of re-tagging.
+Re-running a release re-uploads the tarball for that tag with `--clobber`, so published versions are effectively immutable — bump the version rather than replacing a release's assets.

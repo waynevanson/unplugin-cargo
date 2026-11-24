@@ -1,0 +1,88 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "[0-9]*"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Tag, branch, or commit SHA to release
+        required: false
+        default: main
+        type: string
+
+concurrency:
+  group: release-${{ inputs.ref || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - name: Resolve release tag
+        id: tag
+        run: |
+          version="$(node -p "require('./packages/unplugin-cargo/package.json').version")"
+          tag="$(git describe --exact-match --tags HEAD 2>/dev/null || true)"
+          if [ -n "$tag" ] && [ "${tag#v}" != "$version" ]; then
+            echo "::error::Tag $tag does not match package version $version"
+            exit 1
+          fi
+          if [ -z "$tag" ]; then
+            tag="$version"
+            echo "::notice::HEAD is untagged, releasing $tag from $(git rev-parse --short HEAD)"
+            echo "target=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          fi
+          echo "value=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Pack tarball
+        working-directory: packages/unplugin-cargo
+        run: pnpm pack --pack-destination "$RUNNER_TEMP"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.tag.outputs.value }}
+          TARGET: ${{ steps.tag.outputs.target }}
+        run: |
+          shopt -s nullglob
+          tarballs=("$RUNNER_TEMP"/waynevanson-unplugin-cargo-*.tgz)
+          if [ "${#tarballs[@]}" -eq 0 ]; then
+            echo "::error::pnpm pack produced no tarball"
+            exit 1
+          fi
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${tarballs[@]}" --clobber
+          else
+            gh release create "$TAG" "${tarballs[@]}" \
+              --title "$TAG" \
+              --generate-notes \
+              ${TARGET:+--target "$TARGET"}
+          fi
+
+          echo "### $TAG" >> "$GITHUB_STEP_SUMMARY"
+          for tarball in "${tarballs[@]}"; do
+            echo "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/$(basename "$tarball")" >> "$GITHUB_STEP_SUMMARY"
+          done
