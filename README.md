@@ -208,23 +208,3 @@ Transformation pipeline:
 3. **Compilation**: Runs `cargo build --target wasm32-unknown-unknown`.
 4. **Binding**: Runs `wasm-bindgen --target=bundler` on the resulting `.wasm` file to a local cache in `node_modules/.cache/unplugin-cargo`.
 5. **Resolution**: Injects the generated JavaScript glue code into your bundle.
-
-## Migration from `@waynevanson/vite-plugin-cargo`
-
-- Install `@waynevanson/unplugin-cargo` instead.
-- Import from the bundler-specific subpath, e.g. `@waynevanson/unplugin-cargo/vite`.
-- Rename the `includes` option to `pattern`.
-- The package is now ESM-only.
-- The TypeScript option type `VitePluginCargoOptions` has been renamed to `UnpluginCargoOptions`.
-
-## Releasing
-
-Releases are cut only in CI, through `.github/workflows/release.yml`, which builds the package, runs `pnpm pack`, and attaches the tarball to a GitHub Release. Bump the root `package.json` and push a matching tag (with or without a `v` prefix) — the workflow refuses to release when the tag and the package version disagree:
-
-```bash
-git tag 0.2.1 && git push origin 0.2.1
-```
-
-You can also release an untagged commit by running the `release` workflow manually from the Actions tab (`workflow_dispatch`) and picking a branch, tag, or commit SHA; in that case the tag is created from the package version. The tag check only applies when HEAD is tagged, so bump the version before re-dispatching.
-
-Re-running a release re-uploads the tarball for that tag with `--clobber`, so published versions are effectively immutable — bump the version rather than replacing a release's assets.
