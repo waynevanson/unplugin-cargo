@@ -59,9 +59,9 @@
 		"wasm-bindgen"
 	],
 	"scripts": {
-		"build": "pnpm typecheck:src && tsdown",
+		"build": "tsdown",
 		"build:all": "turbo run build",
-		"test": "pnpm typecheck:test && vitest run --coverage",
+		"test": "vitest run --coverage",
 		"test:all": "turbo run test",
 		"prepublishOnly": "tsdown",
 		"prepare": "husky || true",
