@@ -5,9 +5,16 @@ on:
     tags:
       - "v*"
       - "[0-9]*"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Tag, branch, or commit SHA to publish
+        required: false
+        default: main
+        type: string
 
 concurrency:
-  group: publish-${{ github.ref }}
+  group: publish-${{ inputs.ref || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -18,6 +25,9 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
 
@@ -32,11 +42,14 @@ jobs:
 
       - name: Verify tag matches package version
         run: |
-          tag="${GITHUB_REF_NAME#v}"
           version="$(node -p "require('./packages/unplugin-cargo/package.json').version")"
-          if [ "$tag" != "$version" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match package version $version"
+          tag="$(git describe --exact-match --tags HEAD 2>/dev/null || true)"
+          if [ -n "$tag" ] && [ "${tag#v}" != "$version" ]; then
+            echo "::error::Tag $tag does not match package version $version"
             exit 1
+          fi
+          if [ -z "$tag" ]; then
+            echo "::notice::HEAD is untagged; publishing $version from $(git rev-parse --short HEAD)"
           fi
 
       - run: pnpm build

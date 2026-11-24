@@ -219,4 +219,6 @@ Publishing happens only in CI, through `.github/workflows/publish.yml`, to GitHu
 git tag 0.3.0 && git push origin 0.3.0
 ```
 
+You can also publish an untagged commit by running the `publish` workflow manually from the Actions tab (`workflow_dispatch`) and picking a branch, tag, or commit SHA. The tag check only applies when HEAD is tagged, so bump the version before re-dispatching.
+
 The workflow installs from the lockfile, builds with `tsup`, and runs `pnpm publish`. It authenticates with the workflow's `GITHUB_TOKEN`, so no secrets need to be configured. Published versions are immutable; bump the version instead of re-tagging.
