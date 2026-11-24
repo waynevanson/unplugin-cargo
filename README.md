@@ -22,33 +22,25 @@ You must have the following installed on your system:
 
 ## Installation
 
-This package is not published to npm. Every release attaches a prebuilt tarball to the [GitHub Releases](https://github.com/waynevanson/unplugin-cargo/releases) page, which any package manager can install straight from its URL — no registry, no token, and no build step:
+This package is not published to npm. Because the built `dist` output is committed, it can be installed directly from a git tag without a build step:
 
 ```bash
 # pnpm
-pnpm add --save-dev https://github.com/waynevanson/unplugin-cargo/releases/download/0.2.1/waynevanson-unplugin-cargo-0.2.1.tgz
+pnpm add --save-dev "github:waynevanson/unplugin-cargo#0.2.1"
 
 # npm
-npm install --save-dev https://github.com/waynevanson/unplugin-cargo/releases/download/0.2.1/waynevanson-unplugin-cargo-0.2.1.tgz
+npm install --save-dev "github:waynevanson/unplugin-cargo#0.2.1"
 
 # yarn
-yarn add --dev https://github.com/waynevanson/unplugin-cargo/releases/download/0.2.1/waynevanson-unplugin-cargo-0.2.1.tgz
+yarn add --dev "github:waynevanson/unplugin-cargo#0.2.1"
 
 # bun
-bun add --dev https://github.com/waynevanson/unplugin-cargo/releases/download/0.2.1/waynevanson-unplugin-cargo-0.2.1.tgz
+bun add --dev "github:waynevanson/unplugin-cargo#0.2.1"
 ```
 
-The version appears twice in that URL, in the tag and in the filename. Swap both occurrences to move to another release; your lockfile pins the tarball's `resolved` URL and `integrity` hash, so upgrades are explicit. Use the tag exactly as it was pushed — a `v`-prefixed tag needs the `v` in the URL's tag segment, though never in the filename.
+The `0.2.1` fragment is the release tag; replace it with another tag, branch, or commit to install a different version. Use the tag exactly as it was pushed — a `v`-prefixed tag needs the `v` in the URL. Your lockfile pins the resolved commit, so upgrades are explicit.
 
-### From the repository
-
-The built `dist` output is committed as well, so the package can also be installed from a git ref without a build step. The package lives at the repository root:
-
-```bash
-pnpm add --save-dev "github:waynevanson/unplugin-cargo#0.2.1"
-```
-
-> npm's [git URL specifier](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies) only accepts a `<commit-ish>` or `semver:<range>` after `#`. The `0.2.1` fragment pins the install to the `0.2.1` tag; replace it with another tag or commit to install a different version. Unlike the tarball, this route requires `git` at install time.
+> npm's [git URL specifier](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies) only accepts a `<commit-ish>` or `semver:<range>` after `#`. This route requires `git` at install time.
 
 ## Usage
 
