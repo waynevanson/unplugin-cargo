@@ -1,7 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { rspack } from "@rspack/core";
-// @ts-expect-error
 import RspackHtmlPlugin from "@rspack/plugin-html";
 import type { UnpluginCargoOptions } from "../../../src/index";
 import { getFixture } from "../fixture";
@@ -45,9 +44,7 @@ export async function buildWithRspack(
 					],
 				},
 				plugins: [
-					// @ts-expect-error
 					cargo(options),
-					// @ts-expect-error
 					new RspackHtmlPlugin({
 						template: path.resolve(fixtureRoot, "index.html"),
 					}),

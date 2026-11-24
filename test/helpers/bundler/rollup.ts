@@ -22,12 +22,7 @@ export async function buildWithRollup(
 	const cargo = await importCargo("rollup");
 	const bundle = await rollup({
 		input: path.resolve(fixtureRoot, "src/index.js"),
-		plugins: [
-			// @ts-expect-error
-			cargo(options),
-			rollupWasmBindgen(),
-			nodeResolve(),
-		],
+		plugins: [cargo(options), rollupWasmBindgen(), nodeResolve()],
 	});
 	await bundle.write({
 		format: "es",

@@ -3,7 +3,7 @@ import type { Plugin } from "vite";
 
 async function generateWasmGlue(buffer: Buffer): Promise<string> {
 	const base64 = buffer.toString("base64");
-	const module = await WebAssembly.compile(buffer);
+	const module = await WebAssembly.compile(buffer as unknown as BufferSource);
 	const imports = WebAssembly.Module.imports(module);
 	const exports = WebAssembly.Module.exports(module);
 

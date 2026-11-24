@@ -31,11 +31,7 @@ export async function watchWithVite(
 	const watcher = (await build({
 		root: fixture,
 		logLevel: "silent",
-		plugins: [
-			// @ts-expect-error
-			cargo(options),
-			wasm(),
-		],
+		plugins: [cargo(options), wasm()],
 		build: {
 			outDir,
 			emptyOutDir: false,

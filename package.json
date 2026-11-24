@@ -59,14 +59,17 @@
 		"wasm-bindgen"
 	],
 	"scripts": {
-		"build": "tsdown",
+		"build": "pnpm typecheck:src && tsdown",
 		"build:all": "turbo run build",
-		"test": "vitest run --coverage",
+		"test": "pnpm typecheck:test && vitest run --coverage",
 		"test:all": "turbo run test",
 		"prepublishOnly": "tsdown",
 		"prepare": "husky || true",
 		"check": "biome check .",
-		"format": "biome format --write ."
+		"format": "biome format --write .",
+		"typecheck": "pnpm typecheck:src && pnpm typecheck:test",
+		"typecheck:src": "tsc --noEmit -p tsconfig.json",
+		"typecheck:test": "tsc --noEmit -p tsconfig.test.json"
 	},
 	"author": "Wayne Van Son",
 	"license": "MIT",

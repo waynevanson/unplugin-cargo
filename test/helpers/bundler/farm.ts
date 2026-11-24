@@ -26,7 +26,10 @@ export async function buildWithFarm(
 				persistentCache: false,
 			},
 			plugins: [cargo(options)],
-			vitePlugins: [() => ({ vitePlugin: farmWasmPlugin(), filters: [".*"] })],
+			vitePlugins: [
+				() => ({ vitePlugin: farmWasmPlugin(), filters: [".*"] }),
+				() => ({ vitePlugin: farmRustFallbackPlugin(), filters: [".*"] }),
+			],
 		},
 		"production",
 		new NoopLogger(),
@@ -36,4 +39,18 @@ export async function buildWithFarm(
 	await compiler.compile();
 	await compiler.writeResourcesToDisk();
 	return outDir;
+}
+
+function farmRustFallbackPlugin() {
+	return {
+		name: "farm-rust-fallback",
+		enforce: "post" as const,
+		load(id: string) {
+			if (!id.toLowerCase().endsWith(".rs")) {
+				return null;
+			}
+
+			return { code: "", map: null };
+		},
+	};
 }

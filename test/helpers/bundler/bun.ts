@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
-import { promisify } from "node:util";
 import path from "node:path";
+import { promisify } from "node:util";
 import type { UnpluginCargoOptions } from "../../../src/index";
 import { createHtml } from "../create-html";
 import { getFixture } from "../fixture";

@@ -1,7 +1,7 @@
 export class WatchQueue {
 	private pending: {
 		resolve: () => void;
-		reject: (error: Error) => void;
+		reject: (error: unknown) => void;
 	} | null = null;
 
 	wait(): Promise<void> {
@@ -17,7 +17,7 @@ export class WatchQueue {
 		resolve();
 	}
 
-	reject(error: Error): void {
+	reject(error: unknown): void {
 		if (!this.pending) return;
 		const { reject } = this.pending;
 		this.pending = null;

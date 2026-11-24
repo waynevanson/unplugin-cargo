@@ -42,7 +42,6 @@ export async function buildWithWebpack(
 					],
 				},
 				plugins: [
-					// @ts-expect-error
 					cargo(options),
 					new HtmlWebpackPlugin({
 						templateContent: `<!doctype html>

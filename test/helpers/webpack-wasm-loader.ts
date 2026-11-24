@@ -58,6 +58,6 @@ export default async function wasmLoader(
 
 		callback(null, code);
 	} catch (err) {
-		callback(err);
+		callback(err instanceof Error ? err : new Error(String(err)));
 	}
 }

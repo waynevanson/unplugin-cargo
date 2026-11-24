@@ -1,7 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { rspack } from "@rspack/core";
-// @ts-expect-error
 import RspackHtmlPlugin from "@rspack/plugin-html";
 import type { UnpluginCargoOptions } from "../../../src/index";
 import { importCargo } from "../import-cargo";
@@ -41,9 +40,7 @@ export async function watchWithRspack(
 			],
 		},
 		plugins: [
-			// @ts-expect-error
 			cargo(options),
-			// @ts-expect-error
 			new RspackHtmlPlugin({
 				template: path.resolve(fixture, "index.html"),
 			}),
@@ -66,8 +63,12 @@ export async function watchWithRspack(
 		outDir,
 		waitForRebuild: () => queue.wait(),
 		close: () =>
-			new Promise((resolve, reject) =>
-				watching.close((err) => (err ? reject(err) : resolve())),
-			),
+			new Promise((resolve, reject) => {
+				try {
+					watching.close(() => resolve());
+				} catch (error) {
+					reject(error);
+				}
+			}),
 	};
 }

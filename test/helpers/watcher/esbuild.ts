@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import type { BuildResult, PluginBuild } from "esbuild";
 import * as esbuild from "esbuild";
 import { wasmLoader } from "esbuild-plugin-wasm";
 import type { UnpluginCargoOptions } from "../../../src/index";
@@ -25,8 +26,8 @@ export async function watchWithEsbuild(
 		plugins: [
 			{
 				name: "watch-tracker",
-				setup(build) {
-					build.onEnd((result) => {
+				setup(build: PluginBuild) {
+					build.onEnd((result: BuildResult) => {
 						if (result.errors.length > 0) {
 							queue.reject(new Error(JSON.stringify(result.errors)));
 						} else {
@@ -35,9 +36,7 @@ export async function watchWithEsbuild(
 					});
 				},
 			},
-			// @ts-expect-error
 			wasmLoader(),
-			// @ts-expect-error
 			cargo(options),
 		],
 	});

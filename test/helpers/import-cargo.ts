@@ -1,10 +1,21 @@
-import path from "node:path";
-import type * as unplugin from "unplugin";
-import type { UnpluginCargoOptions } from "../../src/index";
+import { cargo as cargoEsbuild } from "../../src/esbuild";
+import { cargo as cargoFarm } from "../../src/farm";
+import { cargo as cargoRollup } from "../../src/rollup";
+import { cargo as cargoRspack } from "../../src/rspack";
+import { cargo as cargoVite } from "../../src/vite";
+import { cargo as cargoWebpack } from "../../src/webpack";
 
-const CARGO = path.resolve(import.meta.dirname, "../../src");
+const cargos = {
+	esbuild: cargoEsbuild,
+	farm: cargoFarm,
+	rollup: cargoRollup,
+	rspack: cargoRspack,
+	vite: cargoVite,
+	webpack: cargoWebpack,
+} as const;
 
-export async function importCargo(bundler: string) {
-	const mod = await import(path.resolve(CARGO, `${bundler}.ts`));
-	return mod.cargo as unplugin.UnpluginInstance<UnpluginCargoOptions, boolean>;
+type Bundler = keyof typeof cargos;
+
+export async function importCargo<B extends Bundler>(bundler: B) {
+	return cargos[bundler];
 }

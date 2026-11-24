@@ -22,11 +22,18 @@ export async function getBrowser(): Promise<Browser> {
 	return browser;
 }
 
-export async function runInBrowser(url: string): Promise<{
-	add: number;
-	multiplyAvailable: boolean;
-	multiply: number | null;
-}> {
+export interface BrowserResult {
+	add?: number;
+	multiplyAvailable?: boolean;
+	multiply?: number | null;
+	value?: number;
+	featureAvailable?: boolean;
+	feature?: boolean | null;
+	error?: string;
+	stack?: string;
+}
+
+export async function runInBrowser(url: string): Promise<BrowserResult> {
 	const browser = await getBrowser();
 	const page = await browser.newPage();
 	try {
@@ -34,7 +41,7 @@ export async function runInBrowser(url: string): Promise<{
 		await page.waitForSelector("#result:not(:empty)", { timeout: 30000 });
 		const raw = await page.textContent("#result");
 		if (!raw) throw new Error("No result found");
-		return JSON.parse(raw);
+		return JSON.parse(raw) as BrowserResult;
 	} finally {
 		await page.close();
 	}

@@ -7,6 +7,17 @@ import { cleanupFixture, createFixture } from "./fixture";
 import { startServer } from "./server";
 import type { WatchWith } from "./watcher/types";
 
+async function captureError(promise: Promise<unknown>): Promise<Error> {
+	try {
+		await promise;
+	} catch (error) {
+		if (error instanceof Error) return error;
+		throw error;
+	}
+
+	throw new Error("Expected the promise to reject");
+}
+
 export function runBundlerTests(
 	name: string,
 	buildFn: (options: UnpluginCargoOptions, fixture?: string) => Promise<string>,
@@ -14,8 +25,11 @@ export function runBundlerTests(
 	describe.concurrent(name, () => {
 		const fixtureRoots = new Set<string>();
 
-		const buildAndTrack = async (options: UnpluginCargoOptions) => {
-			const outDir = await buildFn(options);
+		const buildAndTrack = async (
+			options: UnpluginCargoOptions,
+			fixture?: string,
+		) => {
+			const outDir = await buildFn(options, fixture);
 			fixtureRoots.add(path.dirname(path.dirname(outDir)));
 			return outDir;
 		};
@@ -163,6 +177,56 @@ export function runBundlerTests(
 			}
 		});
 
+		test("ignores .rs files that are not cargo entrypoints", async () => {
+			const fixture = await createFixture();
+			fixtureRoots.add(fixture);
+
+			const outsideFixture = path.resolve(
+				path.dirname(fixture),
+				`${path.basename(fixture)}-outside.rs`,
+			);
+			await fs.writeFile(outsideFixture, "// not part of a cargo project");
+			await fs.writeFile(
+				path.resolve(fixture, "src/not-an-entry.rs"),
+				"// not a cargo entrypoint",
+			);
+
+			const outsideImport = path
+				.relative(path.resolve(fixture, "src"), outsideFixture)
+				.replace(/\\/g, "/");
+
+			await fs.writeFile(
+				path.resolve(fixture, "src/index.js"),
+				[
+					'import { add } from "./lib.rs";',
+					`import "${outsideImport}";`,
+					'import "./not-an-entry.rs";',
+					"",
+					'document.getElementById("result").textContent = JSON.stringify({',
+					"  add: add(2.0, 2.0),",
+					"  multiplyAvailable: false,",
+					"  multiply: null,",
+					"});",
+				].join("\n"),
+			);
+
+			try {
+				const outDir = await buildAndTrack(
+					{ pattern: "**/src/lib.rs" },
+					fixture,
+				);
+				const { url, close } = await startServer(outDir);
+				try {
+					const result = await runInBrowser(url);
+					expect(result.add).toBe(4);
+				} finally {
+					await close();
+				}
+			} finally {
+				await fs.rm(outsideFixture, { force: true });
+			}
+		});
+
 		test("throws for a non-cdylib fixture", async () => {
 			const fixture = await createFixture();
 			fixtureRoots.add(fixture);
@@ -189,8 +253,8 @@ export function runBundlerTests(
 			);
 
 			const libraryFilePath = path.resolve(fixture, "src/lib.rs");
-			const error = await buildFn({ pattern: "**/src/lib.rs" }, fixture).catch(
-				(e: Error) => e,
+			const error = await captureError(
+				buildFn({ pattern: "**/src/lib.rs" }, fixture),
 			);
 			expect(error.message).toContain(
 				"Expected exactly 1 target to match the src_path of",
@@ -209,8 +273,8 @@ export function runBundlerTests(
 				["[workspace]", "members = []", 'resolver = "3"'].join("\n"),
 			);
 
-			const error = await buildFn({ pattern: "**/src/lib.rs" }, fixture).catch(
-				(e: Error) => e,
+			const error = await captureError(
+				buildFn({ pattern: "**/src/lib.rs" }, fixture),
 			);
 			expect(error.message).toContain(
 				"Expected exactly 1 package to have the manifest_path of",

@@ -31,17 +31,11 @@ export async function watchWithRolldown(
 	const watcher = watch({
 		input: path.resolve(fixture, "src/index.js"),
 		output: { format: "esm", dir: outDir, entryFileNames: "index.js" },
-		plugins: [
-			// @ts-expect-error
-			cargo(options),
-			// @ts-expect-error
-			rollupWasmBindgen(),
-		],
-		// @ts-expect-error
+		plugins: [cargo(options), rollupWasmBindgen()],
 		checks: {
 			pluginTimings: false,
 		},
-	}) as RollupWatcher;
+	}) as unknown as RollupWatcher;
 
 	const queue = new WatchQueue();
 	const unsubscribe = waitForEnd(watcher, queue);

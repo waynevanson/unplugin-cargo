@@ -47,7 +47,7 @@ function resolveProfile(options: UnpluginCargoOptions): string {
 }
 
 function normalizeFeatures(options: UnpluginCargoOptions) {
-	if ("allFeatures" in options && options.allFeatures) {
+	if ("allFeatures" in options) {
 		return { allFeatures: true };
 	}
 	return {

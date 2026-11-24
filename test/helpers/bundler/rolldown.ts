@@ -21,13 +21,7 @@ export async function buildWithRolldown(
 	const { rolldown } = await import("rolldown");
 	const bundle = await rolldown({
 		input: path.resolve(fixtureRoot, "src/index.js"),
-		plugins: [
-			// @ts-expect-error
-			cargo(options),
-			// @ts-expect-error
-			rollupWasmBindgen(),
-		],
-		// @ts-expect-error rolldown supports `checks` but types lag behind
+		plugins: [cargo(options), rollupWasmBindgen()],
 		checks: {
 			pluginTimings: false,
 		},

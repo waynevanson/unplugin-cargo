@@ -85,7 +85,10 @@ export function createGraphFromDependencies(contents: string, baseDir: string) {
 	);
 }
 
-function findAllDescendants(start: string, graph: Map<string, Set<string>>) {
+export function findAllDescendants(
+	start: string,
+	graph: Map<string, Set<string>>,
+) {
 	const collecteds = new Set<string>();
 	const initials = graph.get(start);
 

@@ -24,12 +24,8 @@ export async function buildWithEsbuild(
 		bundle: true,
 		format: "esm",
 		outdir: outDir,
-		plugins: [
-			// @ts-expect-error
-			wasmLoader(),
-			// @ts-expect-error
-			cargo(options),
-		],
+		loader: { ".rs": "js" },
+		plugins: [wasmLoader(), cargo(options)],
 	});
 	await createHtml(outDir, "./index.js");
 	return outDir;

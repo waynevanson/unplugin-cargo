@@ -32,12 +32,7 @@ export async function watchWithRollup(
 	const watcher = rollupWatch({
 		input: path.resolve(fixture, "src/index.js"),
 		output: { format: "es", dir: outDir },
-		plugins: [
-			// @ts-expect-error
-			cargo(options),
-			rollupWasmBindgen(),
-			nodeResolve(),
-		],
+		plugins: [cargo(options), rollupWasmBindgen(), nodeResolve()],
 	});
 
 	const queue = new WatchQueue();

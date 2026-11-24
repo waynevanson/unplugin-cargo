@@ -6,7 +6,10 @@ import { findOnlyOne } from "./utils";
 
 const execFileAsync = promisify(execFile);
 
-export async function findProjectMetadata(projectFilename: string, log: pino.Logger) {
+export async function findProjectMetadata(
+	projectFilename: string,
+	log: pino.Logger,
+) {
 	const args = [
 		"metadata",
 		"--no-deps",

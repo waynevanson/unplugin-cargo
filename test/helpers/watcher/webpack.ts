@@ -40,7 +40,6 @@ export async function watchWithWebpack(
 			],
 		},
 		plugins: [
-			// @ts-expect-error
 			cargo(options),
 			new HtmlWebpackPlugin({
 				templateContent: `<!doctype html>
@@ -63,6 +62,10 @@ export async function watchWithWebpack(
 			queue.resolve();
 		}
 	});
+
+	if (!watching) {
+		throw new Error("Expected webpack to return a watcher");
+	}
 
 	await queue.wait();
 
