@@ -51,7 +51,9 @@ Import the plugin from the subpath for your bundler and specify which files shou
 #### Vite
 
 ```typescript
+// vite.config.ts
 import { defineConfig } from "vite";
+import wasm from "vite-plugin-wasm";
 import { cargo } from "@waynevanson/unplugin-cargo/vite";
 
 export default defineConfig({
@@ -60,6 +62,7 @@ export default defineConfig({
       // Files to treat as Cargo entrypoints
       pattern: "src/lib.rs",
     }),
+    wasm(),
   ],
 });
 ```
@@ -67,23 +70,44 @@ export default defineConfig({
 #### Rollup
 
 ```typescript
+// rollup.config.js
 import { cargo } from "@waynevanson/unplugin-cargo/rollup";
+import { unwasm } from "unwasm/plugin";
 
 export default {
   plugins: [
     cargo({
       pattern: "src/lib.rs",
     }),
+    unwasm({}),
   ],
 };
 ```
 
 #### Webpack
 
-```typescript
+```javascript
+// webpack.config.cjs
+// Webpack needs a loader that synchronously instantiates wasm-bindgen's
+// `--target=bundler` output. See test/helpers/webpack-wasm-loader.ts for a
+// reference implementation.
+const path = require("node:path");
 const { cargo } = require("@waynevanson/unplugin-cargo/webpack");
 
 module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.wasm$/,
+        type: "javascript/auto",
+        use: [
+          {
+            loader: path.resolve(__dirname, "wasm-loader.cjs"),
+          },
+        ],
+      },
+    ],
+  },
   plugins: [
     cargo({
       pattern: "src/lib.rs",
@@ -95,11 +119,14 @@ module.exports = {
 #### esbuild
 
 ```typescript
+// build.mjs
 import { cargo } from "@waynevanson/unplugin-cargo/esbuild";
 import { build } from "esbuild";
+import { wasmLoader } from "esbuild-plugin-wasm";
 
 build({
   plugins: [
+    wasmLoader(),
     cargo({
       pattern: "src/lib.rs",
     }),
@@ -109,25 +136,29 @@ build({
 
 #### Rspack
 
-```typescript
-const { cargo } = require("@waynevanson/unplugin-cargo/rspack");
+```javascript
+// rspack.config.mjs
+import { cargo } from "@waynevanson/unplugin-cargo/rspack";
+import { unwasmRspack } from "unwasm/plugin/rspack";
 
-module.exports = {
+export default {
   plugins: [
     cargo({
       pattern: "src/lib.rs",
     }),
+    unwasmRspack({}),
   ],
 };
 ```
+
+The WASM plugins shown above (`vite-plugin-wasm`, `unwasm`, and `esbuild-plugin-wasm`) are separate dependencies; install the one for your bundler alongside this package. Webpack needs a custom synchronous `.wasm` loader instead of a package; see [`test/helpers/webpack-wasm-loader.ts`](https://github.com/waynevanson/unplugin-cargo/blob/main/test/helpers/webpack-wasm-loader.ts) for a reference implementation.
 
 ### 2. Prepare your Rust code
 
 Ensure your Rust crate is configured as a `cdylib`.
 
-**Cargo.toml**
-
 ```toml
+# Cargo.toml
 [package]
 name = "my-rust-lib"
 version = "0.1.0"
@@ -140,9 +171,8 @@ crate-type = ["cdylib"]
 wasm-bindgen = "0.2"
 ```
 
-**src/lib.rs**
-
 ```rust
+// src/lib.rs
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -154,6 +184,7 @@ pub fn greet(name: &str) -> String {
 ### 3. Import in JS/TS
 
 ```typescript
+// index.ts
 import { greet } from "./src/lib.rs";
 
 console.log(greet("Vite"));
