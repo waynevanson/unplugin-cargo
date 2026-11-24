@@ -59,11 +59,11 @@
 		"wasm-bindgen"
 	],
 	"scripts": {
-		"build": "tsup",
+		"build": "tsdown",
 		"build:all": "turbo run build",
 		"test": "vitest run --coverage",
 		"test:all": "turbo run test",
-		"prepublishOnly": "tsup",
+		"prepublishOnly": "tsdown",
 		"prepare": "husky || true",
 		"check": "biome check .",
 		"format": "biome format --write ."
@@ -93,7 +93,7 @@
 		"rolldown": "^1.1.1",
 		"rollup": "^4.57.1",
 		"sirv": "^3.0.2",
-		"tsup": "^8.0.0",
+		"tsdown": "^0.23.7",
 		"turbo": "2.10.11",
 		"typescript": "^5.9.3",
 		"vite": "^7.3.1",

@@ -1,5 +1,5 @@
 import { builtinModules } from "node:module";
-import { defineConfig } from "tsup";
+import { defineConfig } from "tsdown";
 
 const builtInNodeModules = [
 	...builtinModules,
@@ -24,10 +24,15 @@ export default defineConfig({
 		esbuild: "src/esbuild.ts",
 		rspack: "src/rspack.ts",
 	},
-	format: ["esm"],
+	format: "esm",
 	dts: true,
 	sourcemap: true,
-	splitting: false,
 	clean: true,
-	external: [...builtInNodeModules, ...dependencies],
+	fixedExtension: false,
+	deps: {
+		neverBundle: [...builtInNodeModules, ...dependencies],
+		dts: {
+			neverBundle: true,
+		},
+	},
 });

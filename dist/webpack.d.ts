@@ -1,7 +1,3 @@
-import * as unplugin from 'unplugin';
-import { U as UnpluginCargoOptions } from './options-CGIQl49C.js';
-import 'pino';
-
-declare const cargo: (options: UnpluginCargoOptions) => unplugin.WebpackPluginInstance;
-
-export { cargo, cargo as default };
+import { t as UnpluginCargoOptions } from "./options-CSiqdzLG.js";
+export declare const cargo: (options: UnpluginCargoOptions) => import("webpack").WebpackPluginInstance;
+export { cargo as default };

@@ -1,7 +1,4 @@
-import { UnpluginInstance } from 'unplugin';
-import { U as UnpluginCargoOptions } from './options-CGIQl49C.js';
-import 'pino';
-
-declare const cargo: UnpluginInstance<UnpluginCargoOptions, boolean>["farm"];
-
-export { cargo, cargo as default };
+import { UnpluginInstance } from "unplugin";
+import { t as UnpluginCargoOptions } from "./options-CSiqdzLG.js";
+export declare const cargo: UnpluginInstance<UnpluginCargoOptions, boolean>["farm"];
+export { cargo as default };

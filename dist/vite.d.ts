@@ -1,7 +1,3 @@
-import * as vite from 'vite';
-import { U as UnpluginCargoOptions } from './options-CGIQl49C.js';
-import 'pino';
-
-declare const cargo: (options: UnpluginCargoOptions) => vite.Plugin<any> | vite.Plugin<any>[];
-
-export { cargo, cargo as default };
+import { t as UnpluginCargoOptions } from "./options-CSiqdzLG.js";
+export declare const cargo: (options: UnpluginCargoOptions) => import("vite").Plugin<any> | import("vite").Plugin<any>[];
+export { cargo as default };

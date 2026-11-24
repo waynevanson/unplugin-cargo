@@ -1,7 +1,3 @@
-import * as unplugin from 'unplugin';
-import { U as UnpluginCargoOptions } from './options-CGIQl49C.js';
-import 'pino';
-
-declare const cargo: unplugin.UnpluginInstance<UnpluginCargoOptions, boolean>;
-
-export { UnpluginCargoOptions, cargo, cargo as default };
+import { t as UnpluginCargoOptions } from "./options-CSiqdzLG.js";
+export declare const cargo: import("unplugin").UnpluginInstance<UnpluginCargoOptions, boolean>;
+export { type UnpluginCargoOptions, cargo as default };
