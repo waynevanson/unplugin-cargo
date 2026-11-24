@@ -22,7 +22,15 @@ You must have the following installed on your system:
 
 ## Installation
 
+This package is published to [GitHub Packages](https://github.com/waynevanson/unplugin-cargo/pkgs/npm/unplugin-cargo), not to npm. GitHub Packages requires authentication even for public packages, so add the registry and a token with `read:packages` to your `.npmrc`:
+
+```ini
+@waynevanson:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+```
+
 ```bash
+# NODE_AUTH_TOKEN should be a GitHub token with read:packages
 npm install @waynevanson/unplugin-cargo --save-dev
 ```
 
@@ -202,3 +210,13 @@ Transformation pipeline:
 - Rename the `includes` option to `pattern`.
 - The package is now ESM-only.
 - The TypeScript option type `VitePluginCargoOptions` has been renamed to `UnpluginCargoOptions`.
+
+## Releasing
+
+Publishing happens only in CI, through `.github/workflows/publish.yml`, to GitHub Packages. Bump `packages/unplugin-cargo/package.json` and push a matching tag (with or without a `v` prefix) — the workflow refuses to publish when the tag and the package version disagree:
+
+```bash
+git tag 0.3.0 && git push origin 0.3.0
+```
+
+The workflow installs from the lockfile, builds with `tsup`, and runs `pnpm publish`. It authenticates with the workflow's `GITHUB_TOKEN`, so no secrets need to be configured. Published versions are immutable; bump the version instead of re-tagging.
