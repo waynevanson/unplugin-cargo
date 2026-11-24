@@ -25,8 +25,17 @@ You must have the following installed on your system:
 This package is not published to npm. Every release attaches a prebuilt tarball to the [GitHub Releases](https://github.com/waynevanson/unplugin-cargo/releases) page, which any package manager can install straight from its URL — no registry, no token, and no build step:
 
 ```bash
-# npm, pnpm, yarn, bun all accept a tarball URL
+# pnpm
 pnpm add --save-dev https://github.com/waynevanson/unplugin-cargo/releases/download/0.2.1/waynevanson-unplugin-cargo-0.2.1.tgz
+
+# npm
+npm install --save-dev https://github.com/waynevanson/unplugin-cargo/releases/download/0.2.1/waynevanson-unplugin-cargo-0.2.1.tgz
+
+# yarn
+yarn add --dev https://github.com/waynevanson/unplugin-cargo/releases/download/0.2.1/waynevanson-unplugin-cargo-0.2.1.tgz
+
+# bun
+bun add --dev https://github.com/waynevanson/unplugin-cargo/releases/download/0.2.1/waynevanson-unplugin-cargo-0.2.1.tgz
 ```
 
 The version appears twice in that URL, in the tag and in the filename. Swap both occurrences to move to another release; your lockfile pins the tarball's `resolved` URL and `integrity` hash, so upgrades are explicit. Use the tag exactly as it was pushed — a `v`-prefixed tag needs the `v` in the URL's tag segment, though never in the filename.
@@ -36,10 +45,10 @@ The version appears twice in that URL, in the tag and in the filename. Swap both
 The built `dist` output is committed as well, so the package can also be installed from a git ref without a build step. This repository is a monorepo, so point the package manager at the package directory:
 
 ```bash
-pnpm add --save-dev "github:waynevanson/unplugin-cargo#path:/packages/unplugin-cargo&0.2.0"
+pnpm add --save-dev "github:waynevanson/unplugin-cargo#path:/packages/unplugin-cargo&0.2.1"
 ```
 
-> npm's [git URL specifier](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies) only accepts a `<commit-ish>` or `semver:<range>` after `#`, and its `<path>` segment refers to the repository path on the host, not a directory inside the repo. `#path:` is a pnpm extension, so use pnpm for a direct GitHub install, or prefer the tarball URL above. The `&0.2.0` fragment pins the install to the `0.2.0` tag; replace it with another tag or commit to install a different version. Unlike the tarball, this route requires `git` at install time.
+> npm's [git URL specifier](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies) only accepts a `<commit-ish>` or `semver:<range>` after `#`, and its `<path>` segment refers to the repository path on the host, not a directory inside the repo. `#path:` is a pnpm extension, so use pnpm for a direct GitHub install, or prefer the tarball URL above. The `&0.2.1` fragment pins the install to the `0.2.1` tag; replace it with another tag or commit to install a different version. Unlike the tarball, this route requires `git` at install time.
 
 ## Usage
 
