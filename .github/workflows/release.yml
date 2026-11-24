@@ -37,12 +37,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm build
+      - run: pnpm build:all
 
       - name: Resolve release tag
         id: tag
         run: |
-          version="$(node -p "require('./packages/unplugin-cargo/package.json').version")"
+          version="$(node -p "require('./package.json').version")"
           tag="$(git describe --exact-match --tags HEAD 2>/dev/null || true)"
           if [ -n "$tag" ] && [ "${tag#v}" != "$version" ]; then
             echo "::error::Tag $tag does not match package version $version"
@@ -57,7 +57,6 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Pack tarball
-        working-directory: packages/unplugin-cargo
         run: pnpm pack --pack-destination "$RUNNER_TEMP"
 
       - name: Publish GitHub Release
