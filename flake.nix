@@ -20,22 +20,18 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
-        toolchains = with fenix.packages.${system}; rec {
-          system = stable.completeToolchain;
-          wasm = targets.wasm32-unknown-unknown.stable.rust-std;
-          combined = combine [
-            system
-            wasm
-          ];
+        toolchain = fenix.packages.${system}.fromToolchainFile {
+          file = ./rust-toolchain.toml;
+          sha256 = "sha256-MFHoWVcPZKjFrLnQnodCXbUsfZcofGfo9tV9fTTvklg=";
         };
 
         rustPlatform = pkgs.makeRustPlatform {
-          cargo = toolchains.system;
-          rustc = toolchains.system;
+          cargo = toolchain;
+          rustc = toolchain;
         };
 
         rustPackages = with pkgs; [
-          toolchains.combined
+          toolchain
           wasm-pack
           llvmPackages.bintools
           wasm-bindgen-cli

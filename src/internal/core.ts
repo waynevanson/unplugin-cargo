@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { copyFile, readFile } from "node:fs/promises";
-import { promisify } from "node:util";
 import path from "node:path";
+import { promisify } from "node:util";
 import pino from "pino";
 import type { UnpluginOptions } from "unplugin";
 import { cargoBuild } from "./cargo-build";
@@ -9,8 +9,8 @@ import { findProjectFilePath } from "./find-project-file-path";
 import { findProjectWatchFiles } from "./find-project-watch-files";
 import { HashSet } from "./hash-set";
 import { findLibraryMetadata, findProjectMetadata } from "./metadata";
-import { matchesPattern } from "./pattern";
 import { parsePluginOptions, type UnpluginCargoOptions } from "./options";
+import { matchesPattern } from "./pattern";
 import { createLibraryDir, isString } from "./utils";
 
 const execFileAsync = promisify(execFile);
@@ -133,6 +133,7 @@ export function unpluginFactory(
 				projectRoot: path.dirname(projectFilePath),
 				workspaceRoot: projectMetadata.workspace_root,
 				projectFilePath,
+				libraryBuildDir,
 				libraryDepsDir,
 				libraryTargetName,
 			});

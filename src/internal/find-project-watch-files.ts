@@ -6,6 +6,7 @@ interface Options {
 	projectRoot: string;
 	workspaceRoot: string;
 	projectFilePath: string;
+	libraryBuildDir: string;
 	libraryDepsDir: string;
 	libraryTargetName: string;
 }
@@ -38,6 +39,7 @@ export async function findProjectWatchFiles(
 	// paths are relative to the workspace root.
 	const libraryDeps = await findLibraryDependencies({
 		workspaceRoot: options.workspaceRoot,
+		libraryBuildDir: options.libraryBuildDir,
 		libraryDepsDir: options.libraryDepsDir,
 		libraryTargetName: options.libraryTargetName,
 	});

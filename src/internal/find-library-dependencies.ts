@@ -1,17 +1,18 @@
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 
 // todo: instead of watching just dependencies,
 // we need to watch all files and trigger rebuild when the dependencies change.
 export async function findLibraryDependencies(options: {
 	workspaceRoot: string;
+	libraryBuildDir: string;
 	libraryDepsDir: string;
 	libraryTargetName: string;
 }) {
-	const libraryDepsFilePath = path.resolve(
-		options.libraryDepsDir,
-		`${options.libraryTargetName}.d`,
-	);
+	const libraryDepsFilePath = await findFirstExisting([
+		path.resolve(options.libraryDepsDir, `${options.libraryTargetName}.d`),
+		path.resolve(options.libraryBuildDir, `${options.libraryTargetName}.d`),
+	]);
 
 	const dependencies = await readFile(libraryDepsFilePath, {
 		encoding: "utf8",
@@ -22,14 +23,33 @@ export async function findLibraryDependencies(options: {
 		options.workspaceRoot,
 	);
 
-	const neighboursEntry = path.resolve(
-		options.libraryDepsDir,
-		`${options.libraryTargetName}.wasm`,
-	);
+	const neighboursEntry = [
+		path.resolve(options.libraryDepsDir, `${options.libraryTargetName}.wasm`),
+		path.resolve(options.libraryBuildDir, `${options.libraryTargetName}.wasm`),
+	].find((candidate) => graph.has(candidate));
+
+	if (neighboursEntry === undefined) {
+		throw new Error(`Expect the wasm output to exist in the dependency graph`);
+	}
 
 	const neighbours = findAllDescendants(neighboursEntry, graph);
 
 	return neighbours;
+}
+
+async function findFirstExisting(candidates: Array<string>): Promise<string> {
+	for (const candidate of candidates) {
+		try {
+			await access(candidate);
+			return candidate;
+		} catch (error) {
+			if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+		}
+	}
+
+	throw new Error(
+		`Expected one of the following files to exist: ${candidates.join(", ")}`,
+	);
 }
 
 function splitTargets(targets: string): Array<string> {

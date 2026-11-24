@@ -1,8 +1,8 @@
 import { createUnplugin } from "unplugin";
 import { execFile } from "node:child_process";
-import { copyFile, readFile, readdir, stat } from "node:fs/promises";
-import { promisify } from "node:util";
+import { access, copyFile, readFile, readdir, stat } from "node:fs/promises";
 import path$1, * as path from "node:path";
+import { promisify } from "node:util";
 import pino from "pino";
 import fs from "node:fs";
 import { hasher } from "node-object-hash";
@@ -67,9 +67,20 @@ function findProjectFilePath(id, log) {
 }
 // src/internal/find-library-dependencies.ts
 async function findLibraryDependencies(options) {
-	const libraryDepsFilePath = path$1.resolve(options.libraryDepsDir, `${options.libraryTargetName}.d`);
+	const libraryDepsFilePath = await findFirstExisting([path$1.resolve(options.libraryDepsDir, `${options.libraryTargetName}.d`), path$1.resolve(options.libraryBuildDir, `${options.libraryTargetName}.d`)]);
 	const graph = createGraphFromDependencies(await readFile(libraryDepsFilePath, { encoding: "utf8" }), options.workspaceRoot);
-	return findAllDescendants(path$1.resolve(options.libraryDepsDir, `${options.libraryTargetName}.wasm`), graph);
+	const neighboursEntry = [path$1.resolve(options.libraryDepsDir, `${options.libraryTargetName}.wasm`), path$1.resolve(options.libraryBuildDir, `${options.libraryTargetName}.wasm`)].find((candidate) => graph.has(candidate));
+	if (neighboursEntry === void 0) throw new Error(`Expect the wasm output to exist in the dependency graph`);
+	return findAllDescendants(neighboursEntry, graph);
+}
+async function findFirstExisting(candidates) {
+	for (const candidate of candidates) try {
+		await access(candidate);
+		return candidate;
+	} catch (error) {
+		if (error.code !== "ENOENT") throw error;
+	}
+	throw new Error(`Expected one of the following files to exist: ${candidates.join(", ")}`);
 }
 function splitTargets(targets) {
 	return targets.split(/(?<!\\)\s+/).map((target) => target.replace(/\\ /g, " "));
@@ -108,6 +119,7 @@ async function findProjectWatchFiles(options) {
 	for await (const file of findRustSourceFiles(options.projectRoot)) watched.add(file);
 	const libraryDeps = await findLibraryDependencies({
 		workspaceRoot: options.workspaceRoot,
+		libraryBuildDir: options.libraryBuildDir,
 		libraryDepsDir: options.libraryDepsDir,
 		libraryTargetName: options.libraryTargetName
 	});
@@ -223,24 +235,6 @@ const MetadataSchema = v.object({
 		}))
 	}))
 });
-// src/internal/pattern.ts
-function normalizePatterns(patterns) {
-	if (patterns === void 0) return [];
-	return Array.isArray(patterns) ? patterns : [patterns];
-}
-function matchesSinglePattern(id, pattern) {
-	if (typeof pattern === "string") return picomatch.isMatch(id, pattern, { dot: true });
-	return pattern.test(id);
-}
-function matchesPattern(id, pattern) {
-	if (typeof pattern === "string" || pattern instanceof RegExp) return matchesSinglePattern(id, pattern);
-	if (Array.isArray(pattern)) return pattern.some((p) => matchesSinglePattern(id, p));
-	const include = normalizePatterns(pattern.include);
-	const exclude = normalizePatterns(pattern.exclude);
-	const included = include.length === 0 || include.some((p) => matchesSinglePattern(id, p));
-	const excluded = exclude.some((p) => matchesSinglePattern(id, p));
-	return included && !excluded;
-}
 // src/internal/options.ts
 const logLevel = v.picklist([
 	"silent",
@@ -298,6 +292,24 @@ const UnpluginCargoOptionsSchema = v.pipe(v.union([v.object({
 	}
 })));
 const parsePluginOptions = (input) => v.parse(UnpluginCargoOptionsSchema, input);
+// src/internal/pattern.ts
+function normalizePatterns(patterns) {
+	if (patterns === void 0) return [];
+	return Array.isArray(patterns) ? patterns : [patterns];
+}
+function matchesSinglePattern(id, pattern) {
+	if (typeof pattern === "string") return picomatch.isMatch(id, pattern, { dot: true });
+	return pattern.test(id);
+}
+function matchesPattern(id, pattern) {
+	if (typeof pattern === "string" || pattern instanceof RegExp) return matchesSinglePattern(id, pattern);
+	if (Array.isArray(pattern)) return pattern.some((p) => matchesSinglePattern(id, p));
+	const include = normalizePatterns(pattern.include);
+	const exclude = normalizePatterns(pattern.exclude);
+	const included = include.length === 0 || include.some((p) => matchesSinglePattern(id, p));
+	const excluded = exclude.some((p) => matchesSinglePattern(id, p));
+	return included && !excluded;
+}
 // src/internal/core.ts
 const execFileAsync = promisify(execFile);
 function resolveProduction(options) {
@@ -354,6 +366,7 @@ function unpluginFactory(pluginOptions_) {
 				projectRoot: path$1.dirname(projectFilePath),
 				workspaceRoot: projectMetadata.workspace_root,
 				projectFilePath,
+				libraryBuildDir,
 				libraryDepsDir,
 				libraryTargetName
 			});
@@ -414,4 +427,4 @@ async function buildWasmBindgen(input) {
 const cargo = createUnplugin(unpluginFactory);
 export { cargo as t };
 
-//# sourceMappingURL=src-DTOx0YLS.js.map
+//# sourceMappingURL=src-C0q-kqvj.js.map
