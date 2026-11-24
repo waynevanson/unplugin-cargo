@@ -21,10 +21,7 @@
         pkgs = import nixpkgs { inherit system; };
 
         toolchains = with fenix.packages.${system}; rec {
-          system = fromToolchainFile {
-            file = ./rust-toolchain.toml;
-            sha256 = "sha256-P30Tm3O7vQAE725YtDCDHGjNrSsfZO4us11UwJGZSJo=";
-          };
+          system = stable.completeToolchain;
           wasm = targets.wasm32-unknown-unknown.stable.rust-std;
           combined = combine [
             system
