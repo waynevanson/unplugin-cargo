@@ -11,8 +11,9 @@
 		"PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS"
 	],
 	"tasks": {
+		"check": {},
 		"build": {
-			"dependsOn": ["^build"],
+			"dependsOn": ["check", "^build"],
 			"outputs": ["dist/**"]
 		},
 		"test": {
