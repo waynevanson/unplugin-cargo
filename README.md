@@ -48,6 +48,10 @@ The `0.2.1` fragment is the release tag; replace it with another tag, branch, or
 
 Import the plugin from the subpath for your bundler and specify which files should be treated as Rust entrypoints using a glob pattern. Patterns are matched against paths relative to each crate's root (the directory containing `Cargo.toml`).
 
+> [!NOTE]
+> We use wasm plugins since most bundlers by default don't know how to manage the wasm.
+> `unplug-cargo` is only respsonsible for getting the wasm built.
+
 #### Vite
 
 ```typescript
