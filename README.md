@@ -26,16 +26,16 @@ This package is not published to npm. Because the built `dist` output is committ
 
 ```bash
 # pnpm
-pnpm add --save-dev "github:waynevanson/unplugin-cargo#0.2.1"
+pnpm add --save-dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.1"
 
 # npm
-npm install --save-dev "github:waynevanson/unplugin-cargo#0.2.1"
+npm install --save-dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.1"
 
 # yarn
-yarn add --dev "github:waynevanson/unplugin-cargo#0.2.1"
+yarn add --dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.1"
 
 # bun
-bun add --dev "github:waynevanson/unplugin-cargo#0.2.1"
+bun add --dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.1"
 ```
 
 The `0.2.1` fragment is the release tag; replace it with another tag, branch, or commit to install a different version. Use the tag exactly as it was pushed — a `v`-prefixed tag needs the `v` in the URL. Your lockfile pins the resolved commit, so upgrades are explicit.
