@@ -11,20 +11,26 @@
 		"PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS"
 	],
 	"tasks": {
-		"check": {},
+		"check": {
+			"inputs": ["$TURBO_DEFAULT$", "!test-durations.history.jsonl"]
+		},
 		"typecheck": {
-			"dependsOn": ["check"]
+			"dependsOn": ["check"],
+			"inputs": ["$TURBO_DEFAULT$", "!test-durations.history.jsonl"]
 		},
 		"build": {
 			"dependsOn": ["typecheck", "^build"],
+			"inputs": ["$TURBO_DEFAULT$", "!test-durations.history.jsonl"],
 			"outputs": ["dist/**"]
 		},
 		"test": {
 			"dependsOn": ["build"],
+			"inputs": ["$TURBO_DEFAULT$", "!test-durations.history.jsonl"],
 			"outputs": ["coverage/**"]
 		},
 		"prepublishOnly": {
 			"dependsOn": ["build"],
+			"inputs": ["$TURBO_DEFAULT$", "!test-durations.history.jsonl"],
 			"outputs": ["dist/**"]
 		}
 	}
