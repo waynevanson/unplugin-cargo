@@ -1,10 +1,10 @@
 {
 	"name": "@waynevanson/unplugin-cargo",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "Import wasm-bindgen compatible Rust to JavaScript via unplugin",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
-	"private": false,
+	"private": true,
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -33,7 +33,8 @@
 		"./rspack": {
 			"types": "./dist/rspack.d.ts",
 			"default": "./dist/rspack.js"
-		}
+		},
+		"./package.json": "./package.json"
 	},
 	"type": "module",
 	"repository": {
@@ -52,6 +53,7 @@
 		"webpack-plugin",
 		"esbuild-plugin",
 		"rspack-plugin",
+		"farm-plugin",
 		"rust",
 		"cargo",
 		"wasm",

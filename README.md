@@ -1,10 +1,10 @@
 # unplugin-cargo
 
-A universal plugin that seamlessly integrates Rust crates into your frontend project by compiling them to WebAssembly via `cargo` and `wasm-bindgen`. Powered by [unplugin](https://github.com/unjs/unplugin), it works with Vite, Rollup, Webpack, esbuild, and Rspack.
+A universal plugin that seamlessly integrates Rust crates into your frontend project by compiling them to WebAssembly via `cargo` and `wasm-bindgen`. Powered by [unplugin](https://github.com/unjs/unplugin), it works with Vite, Rollup, Webpack, esbuild, Rspack, and Farm.
 
 ## Features
 
-- **Universal**: Works across Vite, Rollup, Webpack, esbuild, and Rspack.
+- **Universal**: Works across Vite, Rollup, Webpack, esbuild, Rspack, and Farm.
 - **Watch mode**: Watches `Cargo.toml`, the workspace `Cargo.lock`, `build.rs`, and every `.rs` file in the project so edits trigger a rebuild (where the bundler supports it).
 - **Cargo workspaces**: dep-info paths resolve against the workspace root, so crates in `crates/*` work as entrypoints.
 - **WASM-Bindgen Integration**: Generates the necessary JS glue code automatically.
@@ -26,19 +26,19 @@ This package is not published to npm. Because the built `dist` output is committ
 
 ```bash
 # pnpm
-pnpm add --save-dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.1"
+pnpm add --save-dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.2"
 
 # npm
-npm install --save-dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.1"
+npm install --save-dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.2"
 
 # yarn
-yarn add --dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.1"
+yarn add --dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.2"
 
 # bun
-bun add --dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.1"
+bun add --dev "git+https://github.com/waynevanson/unplugin-cargo.git#0.2.2"
 ```
 
-The `0.2.1` fragment is the release tag; replace it with another tag, branch, or commit to install a different version. Use the tag exactly as it was pushed — a `v`-prefixed tag needs the `v` in the URL. Your lockfile pins the resolved commit, so upgrades are explicit.
+The `0.2.2` fragment is the release tag; replace it with another tag, branch, or commit to install a different version. Use the tag exactly as it was pushed — a `v`-prefixed tag needs the `v` in the URL. Your lockfile pins the resolved commit, so upgrades are explicit.
 
 > npm's [git URL specifier](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#git-urls-as-dependencies) only accepts a `<commit-ish>` or `semver:<range>` after `#`. This route requires `git` at install time.
 
@@ -50,7 +50,7 @@ Import the plugin from the subpath for your bundler and specify which files shou
 
 > [!NOTE]
 > We use wasm plugins since most bundlers by default don't know how to manage the wasm.
-> `unplug-cargo` is only respsonsible for getting the wasm built.
+> `unplugin-cargo` is only responsible for getting the wasm built.
 
 #### Vite
 
@@ -155,7 +155,23 @@ export default {
 };
 ```
 
-The WASM plugins shown above (`vite-plugin-wasm`, `unwasm`, and `esbuild-plugin-wasm`) are separate dependencies; install the one for your bundler alongside this package. Webpack needs a custom synchronous `.wasm` loader instead of a package; see [`test/helpers/webpack-wasm-loader.ts`](https://github.com/waynevanson/unplugin-cargo/blob/main/test/helpers/webpack-wasm-loader.ts) for a reference implementation.
+#### Farm
+
+```typescript
+// farm.config.ts
+import { defineConfig } from "@farmfe/core";
+import { cargo } from "@waynevanson/unplugin-cargo/farm";
+
+export default defineConfig({
+  plugins: [
+    cargo({
+      pattern: "src/lib.rs",
+    }),
+  ],
+});
+```
+
+The WASM plugins shown above (`vite-plugin-wasm`, `unwasm`, and `esbuild-plugin-wasm`) are separate dependencies; install the one for your bundler alongside this package. Farm also needs a WASM plugin to instantiate the generated module; see [`test/helpers/bundler/farm.ts`](https://github.com/waynevanson/unplugin-cargo/blob/main/test/helpers/bundler/farm.ts) for the setup used by this repository's tests. Webpack needs a custom synchronous `.wasm` loader instead of a package; see [`test/helpers/webpack-wasm-loader.ts`](https://github.com/waynevanson/unplugin-cargo/blob/main/test/helpers/webpack-wasm-loader.ts) for a reference implementation.
 
 ### 2. Prepare your Rust code
 

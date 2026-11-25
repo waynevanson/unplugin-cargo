@@ -181,7 +181,7 @@ describe("findLibraryDependencies", () => {
 		const workspaceRoot = await createTemporaryDirectory();
 		const libraryDepsDir = path.resolve(workspaceRoot, "deps");
 		const libraryBuildDir = path.resolve(workspaceRoot, "build");
-		await mkdir(libraryDepsDir);
+		await writeFile(libraryDepsDir, "");
 		await mkdir(libraryBuildDir);
 
 		await expect(
@@ -189,9 +189,9 @@ describe("findLibraryDependencies", () => {
 				workspaceRoot,
 				libraryBuildDir,
 				libraryDepsDir,
-				libraryTargetName: "x".repeat(300),
+				libraryTargetName: "lib",
 			}),
-		).rejects.toMatchObject({ code: "ENAMETOOLONG" });
+		).rejects.toMatchObject({ code: "ENOTDIR" });
 	});
 
 	it("throws when the wasm output is missing from the dependency graph", async () => {
