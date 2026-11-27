@@ -63,8 +63,9 @@
 	"scripts": {
 		"build": "tsdown",
 		"build:all": "turbo run build",
-		"test": "vitest run --coverage",
-		"test:all": "turbo run test",
+		"test": "turbo run test:unit test:integration",
+		"test:unit": "vitest run --project=src --reporter=default",
+		"test:integration": "vitest run --project=test --reporter=default",
 		"prepublishOnly": "tsdown",
 		"prepare": "husky || true",
 		"check": "biome check .",

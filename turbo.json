@@ -23,10 +23,13 @@
 			"inputs": ["$TURBO_DEFAULT$", "!test-durations.history.jsonl"],
 			"outputs": ["dist/**"]
 		},
-		"test": {
+		"test:unit": {
 			"dependsOn": ["build"],
-			"inputs": ["$TURBO_DEFAULT$", "!test-durations.history.jsonl"],
-			"outputs": ["coverage/**"]
+			"inputs": ["$TURBO_DEFAULT$", "!test-durations.history.jsonl"]
+		},
+		"test:integration": {
+			"dependsOn": ["build"],
+			"inputs": ["$TURBO_DEFAULT$", "!test-durations.history.jsonl"]
 		},
 		"prepublishOnly": {
 			"dependsOn": ["build"],

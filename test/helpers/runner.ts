@@ -22,7 +22,11 @@ export function runBundlerTests(
 	name: string,
 	buildFn: (options: UnpluginCargoOptions, fixture?: string) => Promise<string>,
 ) {
-	describe.concurrent(name, () => {
+	// Each test shells out to Cargo. Running a whole bundler suite concurrently
+	// oversubscribes the CPU (and makes the slower tests hit their timeouts), so
+	// keep the tests within a suite sequential and let Vitest parallelise the
+	// bundler suites themselves.
+	describe(name, () => {
 		const fixtureRoots = new Set<string>();
 
 		const buildAndTrack = async (

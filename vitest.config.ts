@@ -2,10 +2,6 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
 	test: {
-		// todo: deleta all but this line
-		globalSetup: ["./test/globalSetup.ts"],
-		include: ["src/**/*.test.ts", "test/**/*.spec.ts"],
-		testTimeout: 120_000,
 		coverage: {
 			exclude: ["test/**"],
 		},
@@ -20,6 +16,26 @@ export default defineConfig({
 					showDiff: true,
 				},
 			],
+		],
+		projects: [
+			{
+				test: {
+					name: "src",
+					include: ["src/**/*.test.ts"],
+					testTimeout: 120_000,
+				},
+			},
+			{
+				test: {
+					name: "test",
+					include: ["test/**/*.spec.ts"],
+					globalSetup: ["./test/globalSetup.ts"],
+					testTimeout: 120_000,
+					// These suites invoke Cargo and a browser. Running more than one
+					// at a time oversubscribes the machine and causes timeouts.
+					fileParallelism: false,
+				},
+			},
 		],
 	},
 });
